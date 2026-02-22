@@ -9,15 +9,16 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .page { display: none; min-height: 100vh; }
-        .page.active { display: block; animation: fadeIn 0.3s ease-out; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+        /* On s'assure que les pages cachées ne prennent aucune place */
+        .page { display: none; min-height: 100vh; width: 100%; }
+        .page.active { display: flex; flex-direction: column; animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body class="bg-[#F0F2F5]">
 
-    <div id="page-login" class="page active flex flex-col justify-center px-8 bg-white">
+    <div id="page-login" class="page active justify-center px-8 bg-white">
         <div class="text-center mb-10">
             <h1 class="text-4xl font-black text-gray-900 italic">Poster<span class="text-indigo-600 not-italic">Market</span></h1>
             <p class="text-gray-400 text-sm mt-2 font-bold uppercase tracking-widest">Connexion sécurisée</p>
@@ -26,80 +27,95 @@
             <input type="email" id="email" placeholder="Ton email" class="w-full p-4 bg-gray-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-600 text-sm">
             <input type="password" id="password" placeholder="Mot de passe" class="w-full p-4 bg-gray-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-600 text-sm">
             <div class="flex gap-2">
-                <button onclick="authAction('signup')" class="flex-1 bg-gray-100 py-4 rounded-2xl font-bold text-sm">S'inscrire</button>
-                <button onclick="authAction('login')" class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-lg">Entrer</button>
+                <button onclick="authAction('signup')" class="flex-1 bg-gray-100 py-4 rounded-2xl font-bold text-sm active:scale-95 transition">S'inscrire</button>
+                <button onclick="authAction('login')" class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition">Entrer</button>
             </div>
-            <p id="auth-msg" class="text-[10px] text-center font-bold text-red-500 uppercase"></p>
+            <p id="auth-msg" class="text-[10px] text-center font-bold text-red-500 uppercase min-h-[1rem]"></p>
         </div>
     </div>
 
-    <div id="page-home" class="page flex-col justify-center px-6 py-20 space-y-8 bg-white">
-        <div class="flex justify-between items-center mb-10">
-            <h1 class="text-2xl font-black">Poster<span class="text-indigo-600">Market</span></h1>
-            <button onclick="logout()" class="text-gray-400"><i class="fa-solid fa-power-off"></i></button>
+    <div id="page-home" class="page justify-center px-6 py-10 space-y-8 bg-white">
+        <div class="flex justify-between items-center w-full max-w-sm mx-auto">
+            <h1 class="text-2xl font-black italic">Poster<span class="text-indigo-600 not-italic">Market</span></h1>
+            <button onclick="logout()" class="h-10 w-10 bg-gray-50 rounded-full text-gray-400 active:text-red-500 transition">
+                <i class="fa-solid fa-power-off"></i>
+            </button>
         </div>
         <div class="grid gap-4 max-w-sm mx-auto w-full">
-            <button onclick="showPage('page-seller')" class="bg-indigo-600 p-6 rounded-3xl text-left shadow-xl text-white">
-                <h2 class="text-xl font-bold">Espace Vendeur</h2>
-                <p class="text-indigo-100 text-[10px]">Gérer vos affiches et messages</p>
+            <button onclick="showPage('page-seller')" class="bg-indigo-600 p-8 rounded-[2.5rem] text-left shadow-2xl shadow-indigo-100 transition active:scale-95">
+                <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 text-white">
+                    <i class="fa-solid fa-store text-xl"></i>
+                </div>
+                <h2 class="text-white text-2xl font-bold">Espace Vendeur</h2>
+                <p class="text-indigo-100 text-xs mt-1">Gérer vos affiches et messages</p>
             </button>
-            <button onclick="showPage('page-client-list')" class="bg-white p-6 rounded-3xl text-left shadow-lg border">
-                <h2 class="text-gray-900 text-xl font-bold">Explorer</h2>
-                <p class="text-gray-500 text-[10px]">Trouver un designer</p>
+            <button onclick="showPage('page-client-list')" class="bg-gray-50 p-8 rounded-[2.5rem] text-left border border-gray-100 shadow-xl transition active:scale-95">
+                <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center mb-4 text-indigo-600">
+                    <i class="fa-solid fa-magnifying-glass text-xl"></i>
+                </div>
+                <h2 class="text-gray-900 text-2xl font-bold">Explorer</h2>
+                <p class="text-gray-500 text-xs mt-1">Trouver un designer unique</p>
             </button>
         </div>
     </div>
 
-    <div id="page-seller" class="page">
-        <nav class="bg-white shadow-sm px-4 py-3 flex justify-between items-center sticky top-0 z-50">
+    <div id="page-seller" class="page bg-[#F0F2F5]">
+        <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-50">
             <h2 class="text-indigo-600 font-black text-xl italic">PM Studio</h2>
-            <button onclick="showPage('page-home')" class="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-house text-xs"></i></button>
+            <button onclick="showPage('page-home')" class="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center active:scale-90 transition">
+                <i class="fa-solid fa-house text-sm text-gray-600"></i>
+            </button>
         </nav>
         <div class="max-w-xl mx-auto p-4 pb-24">
-            <div class="bg-white p-4 rounded-2xl shadow-sm flex items-center gap-3 mb-6">
-                <div class="h-10 w-10 bg-indigo-100 rounded-full"></div>
-                <button onclick="document.getElementById('modalAdd').style.display='flex'" class="flex-1 bg-gray-100 rounded-full py-2 px-4 text-left text-gray-500 text-xs">Publier une affiche...</button>
-            </div>
-            <div id="vendeur-feed" class="space-y-3">
+            <div id="vendeur-feed" class="space-y-4">
                 </div>
         </div>
     </div>
 
-    <div id="modalAdd" class="fixed inset-0 bg-black/60 z-[100] hidden items-end">
-        <div class="bg-white w-full rounded-t-[2.5rem] p-8">
-            <button onclick="this.parentElement.parentElement.style.display='none'" class="mb-4 text-gray-400 font-bold uppercase text-[10px]">Fermer</button>
-            <input type="text" id="post-title" placeholder="Nom de l'affiche" class="w-full p-4 bg-gray-100 rounded-2xl mb-3 outline-none">
-            <input type="number" id="post-price" placeholder="Prix" class="w-full p-4 bg-gray-100 rounded-2xl mb-3 outline-none">
-            <button onclick="publishPoster()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold">Confirmer la publication</button>
-        </div>
-    </div>
-
     <script>
+        // CONFIGURATION
         const SUPABASE_URL = 'https://gjinqdhodzlsjsjnnydl.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqaW5xZGhvZHpsc2pzam5ueWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODM2NjgsImV4cCI6MjA4NzM1OTY2OH0.7BH1cGi43_hX6FokAiTmH76tgKtqrgM8urCN_bNJurI';
+        const SUPABASE_KEY = 'Sb_publishable_4vmTeBhMk99w1vTw6nUlDg_tlUl6zac';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- NAVIGATION ---
+        // NAVIGATION NETTE
         function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(id === 'page-seller') loadVendeurFeed();
+            // On cache tout proprement
+            document.querySelectorAll('.page').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+            // On affiche la bonne page
+            const target = document.getElementById(id);
+            target.classList.add('active');
+            target.style.display = (id === 'page-login' || id === 'page-home') ? 'flex' : 'block';
+            window.scrollTo(0,0);
         }
 
-        // --- AUTHENTIFICATION ---
+        // AUTHENTIFICATION ET PERSISTANCE
         async function authAction(type) {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const msg = document.getElementById('auth-msg');
 
-            if (type === 'signup') {
-                const { error } = await _supabase.auth.signUp({ email, password });
-                if (error) msg.innerText = error.message;
-                else alert("Vérifie tes emails pour confirmer l'inscription !");
+            if (!email || !password) {
+                msg.innerText = "Champs vides";
+                return;
+            }
+
+            msg.innerText = "Chargement...";
+            msg.style.color = "#4F46E5";
+
+            const { data, error } = (type === 'signup') 
+                ? await _supabase.auth.signUp({ email, password })
+                : await _supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                msg.innerText = error.message;
+                msg.style.color = "red";
             } else {
-                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-                if (error) msg.innerText = error.message;
-                else checkSession();
+                // Succès : Supabase enregistre le jeton dans le navigateur
+                checkSession();
             }
         }
 
@@ -117,38 +133,9 @@
             showPage('page-login');
         }
 
-        // --- LOGIQUE VENDEUR ---
-        async function loadVendeurFeed() {
-            const feed = document.getElementById('vendeur-feed');
-            const { data: messages } = await _supabase.from('messages').select('*').order('created_at', { ascending: false });
-            
-            if (messages && messages.length > 0) {
-                feed.innerHTML = messages.map(m => `
-                    <div class="bg-white p-4 rounded-xl border">
-                        <p class="text-[10px] text-indigo-600 font-bold mb-1">Message reçu</p>
-                        <p class="text-sm font-medium text-gray-800">${m.content}</p>
-                    </div>
-                `).join('');
-            } else {
-                feed.innerHTML = `<p class="text-center text-gray-400 text-xs py-10">Aucun message pour l'instant</p>`;
-            }
-        }
-
-        async function publishPoster() {
-            const { data: { user } } = await _supabase.auth.getUser();
-            const title = document.getElementById('post-title').value;
-            const price = document.getElementById('post-price').value;
-
-            const { error } = await _supabase.from('posters').insert([
-                { title, price: parseFloat(price), seller_id: user.id }
-            ]);
-
-            if (error) alert("Erreur : " + error.message);
-            else { alert("Affiche publiée !"); document.getElementById('modalAdd').style.display='none'; }
-        }
-
-        // Vérifier la connexion au démarrage
+        // Vérification automatique au lancement
         window.onload = checkSession;
     </script>
 </body>
 </html>
+
