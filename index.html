@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PosterMarket Pro | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .page { display: none; min-height: 100vh; }
+        .page.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-[#F0F2F5]">
+
+    <div id="page-home" class="page active flex-col justify-center px-6 py-20 space-y-8 bg-white">
+        <div class="text-center">
+            <h1 class="text-4xl font-black text-gray-900 italic">Poster<span class="text-indigo-600 font-extrabold not-italic">Market</span></h1>
+            <p class="text-gray-400 text-xs mt-2 font-bold uppercase tracking-widest">Marketplace Intelligente</p>
+        </div>
+        <div class="grid gap-4 max-w-sm mx-auto w-full">
+            <button onclick="showPage('page-seller')" class="bg-indigo-600 p-6 rounded-3xl text-left shadow-xl shadow-indigo-100 transition active:scale-95">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-3 text-white">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <h2 class="text-white text-xl font-bold">Espace Vendeur</h2>
+                <p class="text-indigo-100 text-[10px] mt-1">Gérer vos commandes et votre flux</p>
+            </button>
+            <button onclick="showPage('page-client-list')" class="bg-white p-6 rounded-3xl text-left shadow-lg border border-gray-100 transition active:scale-95">
+                <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-3 text-gray-600">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </div>
+                <h2 class="text-gray-900 text-xl font-bold">Explorer</h2>
+                <p class="text-gray-500 text-[10px] mt-1">Trouver un créateur d'affiche</p>
+            </button>
+        </div>
+    </div>
+
+    <div id="page-seller" class="page">
+        <nav class="bg-white shadow-sm px-4 py-2 flex justify-between items-center sticky top-0 z-50">
+            <h2 class="text-indigo-600 font-black text-2xl tracking-tighter italic">PM Studio</h2>
+            <div class="flex gap-2">
+                <button onclick="showPage('page-home')" class="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-house"></i></button>
+                <button class="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center relative">
+                    <i class="fa-solid fa-bell text-gray-600"></i>
+                    <span id="notif-badge" class="hidden absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full border-2 border-white text-[8px] text-white flex items-center justify-center">!</span>
+                </button>
+            </div>
+        </nav>
+
+        <div class="max-w-xl mx-auto pb-24">
+            <div class="bg-white mb-3 shadow-sm">
+                <div class="h-32 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                <div class="px-4 pb-4">
+                    <div class="flex justify-between items-end -mt-10 mb-2">
+                        <div class="h-20 w-20 bg-white p-1 rounded-3xl shadow-md">
+                            <div class="h-full w-full bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold">PRO</div>
+                        </div>
+                        <button class="bg-gray-100 px-4 py-2 rounded-xl font-bold text-sm">Réglages</button>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900">Tableau de Bord Vendeur</h3>
+                    <p class="text-gray-500 text-sm">Gérez vos interactions clients en temps réel</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 mb-3 shadow-sm flex gap-3 items-center">
+                <div class="h-10 w-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-plus"></i></div>
+                <button onclick="openModal()" class="flex-1 bg-gray-100 rounded-full py-2 px-4 text-left text-gray-500 text-sm">
+                    Ajouter une nouvelle affiche...
+                </button>
+            </div>
+
+            <div id="vendeur-feed" class="space-y-3 px-2">
+                <div class="text-center py-10 text-gray-400 text-sm">
+                    <i class="fa-solid fa-spinner animate-spin mb-2"></i><br>Chargement de vos messages...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-client-list" class="page bg-white">
+        <header class="p-6 border-b sticky top-0 bg-white z-10 flex items-center gap-4">
+            <button onclick="showPage('page-home')" class="text-gray-400"><i class="fa-solid fa-arrow-left"></i></button>
+            <h2 class="text-xl font-bold">Designers Disponibles</h2>
+        </header>
+        <div class="p-6 space-y-4" id="client-list-container">
+            <div onclick="showPage('page-profile')" class="bg-gray-50 p-5 rounded-[2rem] border flex items-center gap-4 transition active:scale-95">
+                <div class="h-16 w-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black">JD</div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-gray-900">Jean Designer</h4>
+                    <p class="text-xs text-gray-400 italic">Style Minimaliste</p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-300"></i>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalAdd" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-end">
+        <div class="bg-white w-full rounded-t-[2.5rem] p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">Nouvelle Création</h3>
+                <button onclick="closeModal()" class="text-gray-400 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="post-title" placeholder="Titre de l'affiche" class="w-full p-4 bg-gray-50 rounded-2xl outline-none text-sm">
+                <input type="number" id="post-price" placeholder="Prix (€)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none text-sm">
+                <button onclick="publishPoster()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">Publier sur PosterMarket</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const SUPABASE_URL = 'https://gjinqdhodzlsjsjnnydl.supabase.co';
+        const SUPABASE_KEY = 'Sb_publishable_4vmTeBhMk99w1vTw6nUlDg_tlUl6zac';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- NAVIGATION ---
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'page-seller') loadVendeurFeed();
+        }
+
+        // --- LOGIQUE VENDEUR (FEED) ---
+        async function loadVendeurFeed() {
+            const feed = document.getElementById('vendeur-feed');
+            const { data: messages, error } = await _supabase
+                .from('messages')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                feed.innerHTML = `<p class="text-center text-red-500 p-4">Erreur de connexion</p>`;
+                return;
+            }
+
+            if (!messages || messages.length === 0) {
+                feed.innerHTML = `<div class="text-center py-20 bg-white rounded-3xl text-gray-400 text-sm">Aucun message pour le moment</div>`;
+                return;
+            }
+
+            feed.innerHTML = messages.map(msg => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 transition active:bg-gray-50">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-black text-indigo-600 uppercase tracking-tighter italic">Message Client</span>
+                        <span class="text-[10px] text-gray-400">${new Date(msg.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <p class="text-sm text-gray-800 font-medium">"${msg.content}"</p>
+                    <div class="mt-4 flex gap-2">
+                        <button class="flex-1 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-bold uppercase">Répondre</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- PUBLICATION D'AFFICHE ---
+        async function publishPoster() {
+            const title = document.getElementById('post-title').value;
+            const price = document.getElementById('post-price').value;
+
+            if(!title || !price) return alert("Remplis tous les champs");
+
+            const { error } = await _supabase.from('posters').insert([
+                { title, price: parseFloat(price), seller_id: 'TON_ID_AUTH_ICI' }
+            ]);
+
+            if (error) {
+                alert("Erreur: Connecte-toi d'abord");
+                console.error(error);
+            } else {
+                alert("Publié avec succès !");
+                closeModal();
+            }
+        }
+
+        // --- REALTIME ---
+        _supabase.channel('messages-flux')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                document.getElementById('notif-badge').classList.remove('hidden');
+                loadVendeurFeed();
+            })
+            .subscribe();
+
+        // --- MODAL ---
+        function openModal() { document.getElementById('modalAdd').style.display = 'flex'; }
+        function closeModal() { document.getElementById('modalAdd').style.display = 'none'; }
+
+        // Initialisation
+        window.onload = () => {
+            // Optionnel : vérifier session ici
+        };
+    </script>
+</body>
+</html>
+
