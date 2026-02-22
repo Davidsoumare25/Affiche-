@@ -9,212 +9,179 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; background-color: #F0F2F5; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F0F2F5; }
         .page { display: none; min-height: 100vh; width: 100%; }
-        .page.active { display: block; animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .page.active { display: flex; flex-direction: column; }
+        
+        /* IMAGE FORMAT ORIGINAL : On enlève "aspect-square" et on met "h-auto" */
+        .post-card { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .post-img { width: 100%; height: auto; display: block; object-fit: contain; background-color: #f9f9f9; }
+        
+        /* Dropzone pour l'aperçu avant publication */
+        #preview-container { width: 100%; height: auto; min-height: 200px; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div id="page-login" class="page active bg-white flex-col justify-center px-8">
+    <div id="page-login" class="page active justify-center px-8 bg-white">
         <div class="text-center mb-10">
             <h1 class="text-4xl font-black text-indigo-600 italic">PosterMarket</h1>
-            <p class="text-gray-400 text-sm mt-2 font-bold uppercase tracking-widest">Rejoignez la communauté</p>
         </div>
-        <div class="space-y-4 max-w-sm mx-auto w-full">
-            <input type="email" id="email" placeholder="Email" class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-600">
-            <input type="password" id="password" placeholder="Mot de passe" class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-600">
+        <div class="space-y-4 w-full max-w-sm mx-auto">
+            <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-2xl border-none outline-none ring-1 ring-gray-100 focus:ring-2 focus:ring-indigo-600">
+            <input type="password" id="auth-password" placeholder="Mot de passe" class="w-full p-4 bg-gray-50 rounded-2xl border-none outline-none ring-1 ring-gray-100 focus:ring-2 focus:ring-indigo-600">
             <div class="flex gap-2">
-                <button onclick="authAction('signup')" class="flex-1 bg-gray-200 py-4 rounded-2xl font-bold">S'inscrire</button>
-                <button onclick="authAction('login')" class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">Entrer</button>
+                <button onclick="handleAuth('signup')" class="flex-1 bg-gray-100 py-4 rounded-2xl font-bold text-sm">S'inscrire</button>
+                <button onclick="handleAuth('login')" class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-lg">Entrer</button>
             </div>
-            <p id="auth-msg" class="text-[10px] text-center font-bold text-red-500 uppercase mt-4"></p>
+            <p id="auth-error" class="text-[10px] text-center text-red-500 font-bold uppercase"></p>
         </div>
     </div>
 
-    <div id="page-home" class="page bg-white p-6 space-y-6">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-black italic">Poster<span class="text-indigo-600">Market</span></h1>
-            <button onclick="logout()" class="text-gray-400"><i class="fa-solid fa-power-off"></i></button>
+    <div id="page-home" class="page p-6 space-y-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-black italic">Poster<span class="text-indigo-600">Market</span></h2>
+            <button onclick="logout()" class="text-red-500 bg-white p-3 rounded-full shadow-sm"><i class="fa-solid fa-power-off"></i></button>
         </div>
         
         <div class="grid gap-4">
-            <button onclick="showPage('page-seller-dashboard')" class="bg-indigo-600 p-8 rounded-[2.5rem] text-left text-white shadow-xl shadow-indigo-100 transition active:scale-95">
-                <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4"><i class="fa-solid fa-store text-xl"></i></div>
-                <h2 class="text-2xl font-bold">Espace Vendeur</h2>
-                <p class="opacity-80 text-xs">Publiez vos affiches et gérez vos ventes</p>
+            <button onclick="showPage('page-studio')" class="bg-indigo-600 p-8 rounded-[2.5rem] text-left text-white shadow-xl shadow-indigo-100">
+                <div class="h-12 w-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 text-xl"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <h3 class="text-xl font-bold italic">Studio Vendeur</h3>
+                <p class="text-indigo-100 text-xs mt-1">Publier une nouvelle affiche</p>
             </button>
 
-            <button onclick="showPage('page-feed')" class="bg-gray-50 p-8 rounded-[2.5rem] text-left border border-gray-100 shadow-lg transition active:scale-95">
-                <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center mb-4 text-indigo-600"><i class="fa-solid fa-earth-africa text-xl"></i></div>
-                <h2 class="text-2xl font-bold text-gray-900">Explorer le Flux</h2>
-                <p class="text-gray-500 text-xs">Découvrez les créations du monde entier</p>
+            <button onclick="showPage('page-explore')" class="bg-white p-8 rounded-[2.5rem] text-left border border-gray-100 shadow-lg">
+                <div class="h-12 w-12 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 text-indigo-600 text-xl"><i class="fa-solid fa-images"></i></div>
+                <h3 class="text-xl font-bold text-gray-900 italic">Explorer le Flux</h3>
+                <p class="text-gray-500 text-xs mt-1">Voir toutes les créations</p>
             </button>
         </div>
     </div>
 
-    <div id="page-feed" class="page">
-        <nav class="bg-white shadow-sm px-4 py-3 flex justify-between items-center sticky top-0 z-50">
-            <button onclick="showPage('page-home')" class="text-gray-600"><i class="fa-solid fa-arrow-left"></i></button>
-            <h2 class="text-indigo-600 font-black text-xl italic">Flux PosterMarket</h2>
-            <div class="w-8"></div>
-        </nav>
-        <div id="global-posts" class="max-w-xl mx-auto pb-20 space-y-2">
-            </div>
-    </div>
-
-    <div id="page-seller-dashboard" class="page bg-white">
+    <div id="page-studio" class="page bg-white">
         <nav class="p-4 border-b flex items-center gap-4">
-            <button onclick="showPage('page-home')"><i class="fa-solid fa-arrow-left"></i></button>
-            <h2 class="font-bold">Mon Studio de Vente</h2>
+            <button onclick="showPage('page-home')"><i class="fa-solid fa-chevron-left text-gray-400"></i></button>
+            <h2 class="font-bold">Nouvelle Affiche</h2>
         </nav>
-        
         <div class="p-6 space-y-6">
-            <div class="space-y-4">
-                <label class="block">
-                    <span class="text-sm font-bold text-gray-700">Photo de l'affiche</span>
-                    <div onclick="document.getElementById('post-image').click()" class="mt-2 w-full h-48 bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center text-gray-400 overflow-hidden">
-                        <img id="preview-img" class="hidden w-full h-full object-cover">
-                        <div id="upload-placeholder" class="text-center">
-                            <i class="fa-solid fa-cloud-arrow-up text-3xl mb-2"></i>
-                            <p class="text-xs">Cliquez pour choisir une image</p>
-                        </div>
+            <div onclick="document.getElementById('file-input').click()" class="w-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] p-2 flex flex-col items-center justify-center overflow-hidden">
+                <div id="preview-container">
+                    <img id="img-preview" class="hidden w-full h-auto rounded-2xl">
+                    <div id="upload-icon" class="text-center text-gray-400 p-10">
+                        <i class="fa-solid fa-camera text-4xl mb-2"></i>
+                        <p class="text-xs font-bold uppercase">Sélectionner une photo</p>
                     </div>
-                    <input type="file" id="post-image" class="hidden" accept="image/*" onchange="previewFile()">
-                </label>
-
-                <input type="text" id="post-title" placeholder="Titre de l'affiche..." class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
-                <input type="number" id="post-price" placeholder="Prix (€)..." class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
-                
-                <button id="btn-publish" onclick="publishPoster()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> Publier sur le marché
-                </button>
+                </div>
             </div>
+            <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handlePreview(this)">
+            <input type="text" id="post-title" placeholder="Titre de l'œuvre" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
+            <input type="number" id="post-price" placeholder="Prix (€)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
+            <button id="btn-publish" onclick="submitPoster()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg uppercase tracking-wider">Publier l'affiche</button>
         </div>
+    </div>
+
+    <div id="page-explore" class="page">
+        <nav class="bg-white/80 backdrop-blur-md p-4 sticky top-0 z-50 shadow-sm flex items-center gap-4">
+            <button onclick="showPage('page-home')"><i class="fa-solid fa-chevron-left"></i></button>
+            <h2 class="font-black text-indigo-600 italic">PM EXPLORE</h2>
+        </nav>
+        <div id="feed-container" class="p-4 pb-20 max-w-xl mx-auto">
+            </div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://gjinqdhodzlsjsjnnydl.supabase.co';
-        const SUPABASE_KEY = 'Sb_publishable_4vmTeBhMk99w1vTw6nUlDg_tlUl6zac';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SB_URL = 'https://gjinqdhodzlsjsjnnydl.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqaW5xZGhvZHpsc2pzam5ueWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODM2NjgsImV4cCI6MjA4NzM1OTY2OH0.7BH1cGi43_hX6FokAiTmH76tgKtqrgM8urCN_bNJurI';
+        const _sb = supabase.createClient(SB_URL, SB_KEY);
 
         function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(id === 'page-feed') loadGlobalPosts();
+            document.querySelectorAll('.page').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+            const target = document.getElementById(id);
+            target.classList.add('active');
+            target.style.display = (id === 'page-login' || id === 'page-home') ? 'flex' : 'block';
+            if(id === 'page-explore') loadFeed();
         }
 
-        // PREVISUALISATION DE L'IMAGE
-        function previewFile() {
-            const preview = document.getElementById('preview-img');
-            const placeholder = document.getElementById('upload-placeholder');
-            const file = document.getElementById('post-image').files[0];
-            const reader = new FileReader();
-
-            reader.onloadend = () => {
-                preview.src = reader.result;
-                preview.classList.remove('hidden');
-                placeholder.classList.add('hidden');
+        function handlePreview(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    document.getElementById('img-preview').src = e.target.result;
+                    document.getElementById('img-preview').classList.remove('hidden');
+                    document.getElementById('upload-icon').classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
             }
-            if (file) reader.readAsDataURL(file);
         }
 
-        // AUTHENTIFICATION
-        async function authAction(type) {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { data, error } = (type === 'signup') 
-                ? await _supabase.auth.signUp({ email, password })
-                : await _supabase.auth.signInWithPassword({ email, password });
-
-            if (error) document.getElementById('auth-msg').innerText = error.message;
-            else checkSession();
+        async function handleAuth(type) {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+            const { error } = (type === 'signup') 
+                ? await _sb.auth.signUp({ email, password: pass })
+                : await _sb.auth.signInWithPassword({ email, password: pass });
+            if (error) document.getElementById('auth-error').innerText = error.message;
+            else checkUser();
         }
 
-        async function checkSession() {
-            const { data: { session } } = await _supabase.auth.getSession();
-            if (session) showPage('page-home');
-            else showPage('page-login');
+        async function checkUser() {
+            const { data: { session } } = await _sb.auth.getSession();
+            session ? showPage('page-home') : showPage('page-login');
         }
 
-        // PUBLIER AVEC IMAGE
-        async function publishPoster() {
+        async function submitPoster() {
             const btn = document.getElementById('btn-publish');
-            btn.disabled = true;
-            btn.innerText = "Téléchargement...";
-
-            const { data: { user } } = await _supabase.auth.getUser();
-            const file = document.getElementById('post-image').files[0];
+            const file = document.getElementById('file-input').files[0];
             const title = document.getElementById('post-title').value;
             const price = document.getElementById('post-price').value;
 
-            if(!file || !title) return alert("Image et titre obligatoires !");
+            if(!file || !title) return alert("Photo et titre requis !");
 
-            // 1. Upload de l'image dans le storage
+            btn.disabled = true;
+            btn.innerText = "Chargement...";
+
+            const { data: { user } } = await _sb.auth.getUser();
             const fileName = `${Date.now()}-${file.name}`;
-            const { data: uploadData, error: uploadError } = await _supabase.storage
-                .from('posters-images')
-                .upload(fileName, file);
 
-            if (uploadError) {
-                alert("Erreur upload image");
-                btn.disabled = false;
-                return;
-            }
+            const { data: upData, error: upErr } = await _sb.storage.from('posters-images').upload(fileName, file);
+            if(upErr) { alert("Erreur upload !"); btn.disabled = false; return; }
 
-            const imgUrl = _supabase.storage.from('posters-images').getPublicUrl(fileName).data.publicUrl;
+            const imgUrl = _sb.storage.from('posters-images').getPublicUrl(fileName).data.publicUrl;
 
-            // 2. Création du post dans la table
-            const { error: postError } = await _supabase.from('posters').insert([
-                { title, price, image_url: imgUrl, seller_id: user.id }
-            ]);
-
-            if (postError) alert(postError.message);
-            else {
-                alert("Publié avec succès !");
-                showPage('page-home');
-            }
+            await _sb.from('posters').insert([{ title, price, image_url: imgUrl, seller_id: user.id }]);
+            showPage('page-home');
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publier sur le marché';
         }
 
-        // CHARGER LE FLUX
-        async function loadGlobalPosts() {
-            const feed = document.getElementById('global-posts');
-            feed.innerHTML = '<p class="text-center p-10 text-gray-400 text-xs">Mise à jour du flux...</p>';
-            
-            const { data: posters } = await _supabase
-                .from('posters')
-                .select('*')
-                .order('created_at', { ascending: false });
+        async function loadFeed() {
+            const container = document.getElementById('feed-container');
+            container.innerHTML = '<p class="text-center p-10 text-gray-400">Flux en cours...</p>';
+            const { data: posters } = await _sb.from('posters').select('*').order('created_at', { ascending: false });
 
             if (posters) {
-                feed.innerHTML = posters.map(p => `
-                    <div class="bg-white border-y md:rounded-3xl md:border md:m-4 overflow-hidden">
-                        <div class="p-4 flex items-center gap-3">
-                            <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[10px] font-bold">PM</div>
-                            <p class="font-bold text-sm">Artiste Professionnel</p>
+                container.innerHTML = posters.map(p => `
+                    <div class="post-card">
+                        <div class="p-4 flex items-center gap-2">
+                            <div class="h-7 w-7 rounded-full bg-indigo-600"></div>
+                            <span class="text-xs font-bold">Artiste PosterMarket</span>
                         </div>
-                        <img src="${p.image_url}" class="w-full aspect-square object-cover bg-gray-100">
-                        <div class="p-4">
-                            <div class="flex justify-between items-center mb-1">
-                                <h4 class="font-bold text-gray-900">${p.title}</h4>
-                                <span class="text-indigo-600 font-black">${p.price}€</span>
-                            </div>
-                            <div class="flex gap-4 mt-4 pt-4 border-t border-gray-50">
-                                <button class="flex-1 py-2 bg-gray-50 rounded-xl text-xs font-bold text-gray-600">Détails</button>
-                                <button class="flex-1 py-2 bg-indigo-600 rounded-xl text-xs font-bold text-white shadow-md">Acheter</button>
-                            </div>
+                        <img src="${p.image_url}" class="post-img">
+                        <div class="p-4 flex justify-between items-center">
+                            <div><h4 class="font-bold text-sm uppercase">${p.title}</h4></div>
+                            <div class="text-indigo-600 font-black">${p.price}€</div>
                         </div>
                     </div>
                 `).join('');
             }
         }
 
-        async function logout() { await _supabase.auth.signOut(); showPage('page-login'); }
-        window.onload = checkSession;
+        async function logout() { await _sb.auth.signOut(); showPage('page-login'); }
+        window.onload = checkUser;
     </script>
 </body>
 </html>
