@@ -9,176 +9,185 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F3F4F6; }
-        .page { display: none; min-height: 100vh; width: 100%; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8F9FB; margin: 0; }
+        .page { display: none; min-height: 100vh; }
         .page.active { display: block; }
-        .input-field { width: 100%; padding: 16px; background: #F9FAFB; border-radius: 16px; border: 1px solid #E5E7EB; outline: none; }
-        .input-field:focus { border-color: #4F46E5; ring: 2px; ring-color: #4F46E5; }
-        .btn-primary { background: #4F46E5; color: white; padding: 16px; border-radius: 16px; font-weight: bold; width: 100%; transition: all 0.2s; }
-        .btn-primary:active { transform: scale(0.98); }
-        .portfolio-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .portfolio-item { aspect-ratio: 1; border-radius: 12px; object-fit: cover; background: #E5E7EB; width: 100%; }
+        .input-box { width: 100%; padding: 18px; background: #F3F4F6; border-radius: 20px; border: 2px solid transparent; outline: none; transition: 0.3s; }
+        .input-box:focus { border-color: #4F46E5; background: white; }
+        .btn-main { background: #4F46E5; color: white; padding: 18px; border-radius: 20px; font-weight: 800; width: 100%; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2); }
+        .portfolio-card { width: 100%; border-radius: 24px; background: white; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #F1F1F1; }
+        .img-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .img-item { width: 100%; height: auto; border-radius: 12px; object-fit: contain; background: #f9f9f9; }
     </style>
 </head>
 <body>
 
-    <div id="page-auth" class="page active bg-white px-8 py-12">
-        <div class="max-w-sm mx-auto">
-            <h1 class="text-3xl font-black text-indigo-600 italic mb-2">PosterMarket</h1>
-            <p class="text-gray-400 mb-8 font-medium">Créez votre profil de designer</p>
+    <div id="page-loader" class="page active flex items-center justify-center bg-white">
+        <div class="text-indigo-600 font-bold animate-pulse">Vérification de session...</div>
+    </div>
+
+    <div id="page-auth" class="page bg-white px-8 py-10">
+        <div class="max-w-md mx-auto">
+            <h1 class="text-4xl font-black text-indigo-600 italic mb-2">PosterMarket</h1>
+            <p class="text-gray-400 font-bold mb-8">Rejoignez l'élite du design</p>
             
-            <div id="auth-form" class="space-y-4">
-                <input type="text" id="reg-name" placeholder="Nom complet" class="input-field">
-                <input type="tel" id="reg-phone" placeholder="Numéro de téléphone" class="input-field">
-                <input type="email" id="reg-email" placeholder="Email" class="input-field">
-                <input type="password" id="reg-pass" placeholder="Mot de passe" class="input-field">
-                
-                <button onclick="handleAuth('signup')" class="btn-primary mt-4 shadow-lg shadow-indigo-100">Créer mon compte</button>
-                <button onclick="toggleAuthMode()" class="w-full text-sm text-gray-500 font-bold py-2">Déjà inscrit ? Se connecter</button>
+            <div class="space-y-4">
+                <input type="text" id="reg-name" placeholder="Nom complet" class="input-box">
+                <input type="tel" id="reg-phone" placeholder="Téléphone" class="input-box">
+                <input type="email" id="reg-email" placeholder="Email" class="input-box">
+                <input type="password" id="reg-pass" placeholder="Mot de passe" class="input-box">
+                <button onclick="handleAction('signup')" class="btn-main mt-4">Créer mon catalogue</button>
+                <button onclick="handleAction('login')" class="w-full text-gray-400 font-bold text-sm mt-4">Déjà membre ? Se connecter</button>
             </div>
-            <p id="auth-msg" class="text-xs text-red-500 mt-4 text-center font-bold uppercase"></p>
+            <p id="msg" class="text-red-500 text-xs font-bold mt-4 text-center"></p>
         </div>
     </div>
 
     <div id="page-home" class="page">
-        <nav class="bg-white p-4 border-b flex justify-between items-center sticky top-0 z-50">
-            <span class="font-black italic text-indigo-600 text-xl">PM</span>
+        <nav class="p-5 bg-white flex justify-between items-center sticky top-0 z-50 border-b border-gray-50">
+            <h2 class="text-2xl font-black text-indigo-600 italic">PM</h2>
             <div class="flex gap-4">
-                <button onclick="showPage('page-profile')" class="text-gray-600"><i class="fa-solid fa-circle-user text-xl"></i></button>
-                <button onclick="logout()" class="text-red-400"><i class="fa-solid fa-power-off"></i></button>
+                <button onclick="showPage('page-profile')" class="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-full"><i class="fa-solid fa-user"></i></button>
+                <button onclick="logout()" class="text-gray-300"><i class="fa-solid fa-power-off"></i></button>
             </div>
         </nav>
-        <div class="p-6">
-            <h2 class="text-2xl font-extrabold mb-6">Explorer les <span class="text-indigo-600">Talents</span></h2>
-            <div id="designer-feed" class="space-y-6">
-                </div>
-        </div>
+        <div id="main-feed" class="p-5 max-w-lg mx-auto pb-24">
+            </div>
     </div>
 
     <div id="page-profile" class="page bg-white">
-        <div class="h-40 bg-gray-100 relative" id="prof-cover" style="background-size: cover; background-position: center;">
-            <button onclick="triggerFile('cover')" class="absolute bottom-2 right-2 bg-black/50 text-white p-2 rounded-full text-xs"><i class="fa-solid fa-camera"></i></button>
+        <div class="h-44 bg-indigo-100 relative bg-cover bg-center" id="my-cover">
+            <button onclick="openFile('cover')" class="absolute bottom-4 right-4 bg-white/80 p-2 rounded-xl text-indigo-600"><i class="fa-solid fa-camera"></i></button>
         </div>
         <div class="px-6 -mt-10 relative">
-            <div id="prof-avatar" class="h-20 w-20 rounded-2xl bg-indigo-500 border-4 border-white shadow-md bg-cover bg-center"></div>
-            <button onclick="triggerFile('avatar')" class="absolute top-14 left-16 bg-indigo-600 text-white h-7 w-7 rounded-full border-2 border-white flex items-center justify-center"><i class="fa-solid fa-plus text-[10px]"></i></button>
-            
+            <div id="my-avatar" class="h-24 w-24 rounded-[30px] bg-indigo-600 border-4 border-white shadow-xl bg-cover bg-center"></div>
+            <button onclick="openFile('avatar')" class="absolute top-16 left-20 bg-indigo-600 text-white h-8 w-8 rounded-full border-2 border-white"><i class="fa-solid fa-plus text-xs"></i></button>
             <div class="mt-4">
-                <h3 id="prof-name" class="text-xl font-black">Chargement...</h3>
-                <p id="prof-phone" class="text-sm text-gray-400 font-bold"></p>
-                <textarea id="prof-bio" onblur="saveBio()" class="w-full mt-2 text-sm text-gray-500 outline-none" placeholder="Ajouter une description..."></textarea>
+                <h3 id="my-name" class="text-2xl font-black text-gray-900">...</h3>
+                <p id="my-phone" class="text-indigo-600 font-bold text-sm"></p>
+                <textarea id="my-bio" onblur="updateBio()" class="w-full mt-2 text-gray-400 text-sm outline-none border-none p-0 bg-transparent" placeholder="Décrivez votre style ici..."></textarea>
             </div>
         </div>
-
-        <div class="p-6 border-t mt-6">
-            <div class="flex justify-between items-center mb-4">
-                <h4 class="font-bold text-xs uppercase tracking-widest text-gray-400">Mon Portfolio</h4>
-                <button onclick="triggerFile('portfolio')" class="text-indigo-600 font-bold text-xs bg-indigo-50 px-3 py-1 rounded-full">+ Ajouter</button>
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h4 class="font-black text-gray-900">MON CATALOGUE</h4>
+                <button onclick="openFile('portfolio')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">+ Ajouter un projet</button>
             </div>
-            <div id="prof-portfolio" class="portfolio-grid">
-                </div>
+            <div id="my-portfolio-list" class="img-grid"></div>
         </div>
-        <button onclick="showPage('page-home')" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-3 rounded-full font-bold shadow-2xl text-sm">Retour à l'accueil</button>
+        <button onclick="showPage('page-home')" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-10 py-4 rounded-2xl font-bold shadow-2xl">Retour</button>
     </div>
 
-    <input type="file" id="file-helper" class="hidden" onchange="uploadProcess(this)">
+    <input type="file" id="file-input" class="hidden" onchange="startUpload(this)">
 
     <script>
         const SB_URL = 'https://gjinqdhodzlsjsjnnydl.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqaW5xZGhvZHpsc2pzam5ueWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODM2NjgsImV4cCI6MjA4NzM1OTY2OH0.7BH1cGi43_hX6FokAiTmH76tgKtqrgM8urCN_bNJurI';
         const _sb = supabase.createClient(SB_URL, SB_KEY);
 
-        let currentType = '';
+        let currentMode = '';
 
+        // NAVIGATION AVEC NETTOYAGE
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(id === 'page-home') loadAllDesigners();
-            if(id === 'page-profile') loadMyProfile();
+            if(id === 'page-home') loadGlobalDesigners();
+            if(id === 'page-profile') loadMyProfileData();
         }
 
-        async function handleAuth(mode) {
+        // CONNEXION AUTOMATIQUE
+        async function checkAutoLogin() {
+            const { data: { session } } = await _sb.auth.getSession();
+            if (session) {
+                showPage('page-home');
+            } else {
+                showPage('page-auth');
+            }
+        }
+
+        // AUTHENTIFICATION
+        async function handleAction(type) {
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
             const name = document.getElementById('reg-name').value;
             const phone = document.getElementById('reg-phone').value;
 
-            if(mode === 'signup') {
+            if(type === 'signup') {
                 const { data, error } = await _sb.auth.signUp({ email, password: pass });
                 if(error) return alert(error.message);
-                // Sauvegarde du nom et tel dans la table profiles
                 await _sb.from('profiles').upsert({ id: data.user.id, full_name: name, phone: phone });
             } else {
                 const { error } = await _sb.auth.signInWithPassword({ email, password: pass });
                 if(error) return alert(error.message);
             }
-            checkSession();
+            showPage('page-home');
         }
 
-        async function checkSession() {
-            const { data: { session } } = await _sb.auth.getSession();
-            if(session) showPage('page-home');
-        }
+        // GESTION FICHIERS
+        function openFile(mode) { currentMode = mode; document.getElementById('file-input').click(); }
 
-        function triggerFile(type) { currentType = type; document.getElementById('file-helper').click(); }
-
-        async function uploadProcess(input) {
+        async function startUpload(input) {
             const file = input.files[0];
             if(!file) return;
             const { data: { user } } = await _sb.auth.getUser();
+            const bucket = currentMode === 'portfolio' ? 'portfolio' : (currentMode === 'avatar' ? 'avatars' : 'covers');
             const path = `${user.id}/${Date.now()}_${file.name}`;
-            const bucket = (currentType === 'portfolio') ? 'portfolio' : (currentType === 'avatar' ? 'avatars' : 'covers');
 
             const { data, error } = await _sb.storage.from(bucket).upload(path, file);
-            if(error) return alert("Erreur : Vérifiez que vos buckets Storage sont en PUBLIC !");
+            if(error) return alert("Vérifiez que le bucket '" + bucket + "' est PUBLIC sur Supabase !");
 
             const url = _sb.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 
-            if(currentType === 'portfolio') {
+            if(currentMode === 'portfolio') {
                 await _sb.from('portfolio').insert({ designer_id: user.id, image_url: url });
             } else {
-                const up = currentType === 'avatar' ? { avatar_url: url } : { cover_url: url };
-                await _sb.from('profiles').update(up).eq('id', user.id);
+                const updateData = currentMode === 'avatar' ? { avatar_url: url } : { cover_url: url };
+                await _sb.from('profiles').update(updateData).eq('id', user.id);
             }
-            loadMyProfile();
+            loadMyProfileData();
         }
 
-        async function loadMyProfile() {
+        async function loadMyProfileData() {
             const { data: { user } } = await _sb.auth.getUser();
             const { data: prof } = await _sb.from('profiles').select('*').eq('id', user.id).single();
             if(prof) {
-                document.getElementById('prof-name').innerText = prof.full_name || 'Nom non défini';
-                document.getElementById('prof-phone').innerText = prof.phone || '';
-                document.getElementById('prof-bio').value = prof.bio || '';
-                if(prof.avatar_url) document.getElementById('prof-avatar').style.backgroundImage = `url(${prof.avatar_url})`;
-                if(prof.cover_url) document.getElementById('prof-cover').style.backgroundImage = `url(${prof.cover_url})`;
+                document.getElementById('my-name').innerText = prof.full_name || 'Designer';
+                document.getElementById('my-phone').innerText = prof.phone || '';
+                document.getElementById('my-bio').value = prof.bio || '';
+                if(prof.avatar_url) document.getElementById('my-avatar').style.backgroundImage = `url(${prof.avatar_url})`;
+                if(prof.cover_url) document.getElementById('my-cover').style.backgroundImage = `url(${prof.cover_url})`;
             }
             const { data: port } = await _sb.from('portfolio').select('*').eq('designer_id', user.id);
-            document.getElementById('prof-portfolio').innerHTML = port?.map(i => `<img src="${i.image_url}" class="portfolio-item">`).join('') || '';
+            document.getElementById('my-portfolio-list').innerHTML = port?.map(i => `<img src="${i.image_url}" class="img-item">`).join('') || '';
         }
 
-        async function loadAllDesigners() {
-            const feed = document.getElementById('designer-feed');
+        async function loadGlobalDesigners() {
+            const feed = document.getElementById('main-feed');
             const { data: designers } = await _sb.from('profiles').select('*, portfolio(*)');
             feed.innerHTML = designers?.map(d => `
-                <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-gray-100">
-                    <div class="flex gap-4 items-center">
-                        <img src="${d.avatar_url || ''}" class="h-14 w-14 rounded-2xl bg-indigo-100 object-cover">
+                <div class="portfolio-card">
+                    <div class="p-5 flex items-center gap-4">
+                        <img src="${d.avatar_url || ''}" class="h-12 w-12 rounded-2xl bg-indigo-50 object-cover">
                         <div>
-                            <h4 class="font-bold text-gray-900">${d.full_name || 'Designer'}</h4>
-                            <p class="text-xs text-indigo-600 font-bold">${d.phone || ''}</p>
+                            <h4 class="font-bold text-gray-900">${d.full_name || 'Designer Pro'}</h4>
+                            <p class="text-xs text-indigo-600 font-bold"><i class="fa-solid fa-phone mr-1"></i> ${d.phone || 'Non défini'}</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-3 gap-2 mt-4">
-                        ${d.portfolio?.slice(0,3).map(p => `<img src="${p.image_url}" class="h-20 w-full object-cover rounded-xl">`).join('')}
+                    <div class="px-5 pb-5 grid grid-cols-2 gap-2">
+                        ${d.portfolio?.slice(0,2).map(p => `<img src="${p.image_url}" class="img-item">`).join('')}
                     </div>
-                    <button class="w-full mt-4 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs uppercase">Voir le catalogue complet</button>
+                    <div class="px-5 pb-5 flex gap-2">
+                        <a href="https://wa.me/${d.phone}" class="flex-1 bg-green-500 text-white py-3 rounded-xl text-center text-xs font-bold">WhatsApp</a>
+                        <button onclick="startChat('${d.id}')" class="flex-1 bg-gray-50 text-gray-600 py-3 rounded-xl text-xs font-bold">Voir Catalogue</button>
+                    </div>
                 </div>
-            `).join('') || 'Aucun designer';
+            `).join('') || 'Aucun designer disponible.';
         }
 
-        function logout() { _sb.auth.signOut(); showPage('page-auth'); }
-        window.onload = checkSession;
+        async function logout() { await _sb.auth.signOut(); showPage('page-auth'); }
+        
+        // LANCEMENT
+        window.onload = checkAutoLogin;
     </script>
 </body>
 </html>
