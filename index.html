@@ -1,95 +1,204 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PosterMarket Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8">
+<title>PosterMarket</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f4f4;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.hidden { display: none; }
+
+input, button {
+  display: block;
+  margin: 10px 0;
+  padding: 10px;
+  width: 100%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.card img {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  background: #eee;
+}
+</style>
 </head>
-<body class="bg-gray-50">
 
-    <div id="loader" class="fixed inset-0 bg-white flex items-center justify-center z-[100]">
-        <p class="text-indigo-600 font-bold animate-pulse">Vérification de session...</p>
-    </div>
+<body>
+<div class="container">
 
-    <div id="section-auth" class="hidden min-h-screen flex-col items-center justify-center p-6 bg-white">
-        <h1 class="text-3xl font-black text-indigo-600 mb-8 italic">PosterMarket</h1>
-        <div class="w-full max-w-sm space-y-4">
-            <input type="text" id="reg-name" placeholder="Nom Complet" class="w-full p-4 bg-gray-100 rounded-2xl outline-none">
-            <input type="tel" id="reg-phone" placeholder="Numéro de Téléphone" class="w-full p-4 bg-gray-100 rounded-2xl outline-none">
-            <input type="email" id="reg-email" placeholder="Email" class="w-full p-4 bg-gray-100 rounded-2xl outline-none">
-            <input type="password" id="reg-pass" placeholder="Mot de passe" class="w-full p-4 bg-gray-100 rounded-2xl outline-none">
-            <button onclick="auth('signup')" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold">Créer mon compte</button>
-            <button onclick="auth('login')" class="w-full text-gray-400 text-sm font-bold">Déjà inscrit ? Se connecter</button>
-        </div>
-    </div>
+<!-- AUTH -->
+<div id="authView">
+  <h2 id="authTitle">Inscription</h2>
 
-    <div id="section-app" class="hidden min-h-screen">
-        <nav class="p-4 bg-white border-b flex justify-between items-center">
-            <span class="font-black text-indigo-600">PM PRO</span>
-            <button onclick="logout()" class="text-red-500 text-sm font-bold">Déconnexion</button>
-        </nav>
-        <div class="p-6">
-            <h2 class="text-xl font-bold">Bienvenue, <span id="user-display">...</span></h2>
-            <p class="text-gray-500 text-sm">Votre catalogue est prêt.</p>
-        </div>
-    </div>
+  <input id="fullName" placeholder="Nom complet">
+  <input id="phone" placeholder="Téléphone WhatsApp">
 
-    <script>
-        // REMPLACE BIEN PAR TES CLÉS SUPABASE ICI
-        const SB_URL = 'https://gjinqdhodzlsjsjnnydl.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqaW5xZGhvZHpsc2pzam5ueWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODM2NjgsImV4cCI6MjA4NzM1OTY2OH0.7BH1cGi43_hX6FokAiTmH76tgKtqrgM8urCN_bNJurI';
-        const _sb = supabase.createClient(SB_URL, SB_KEY);
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Mot de passe">
 
-        // 1. GESTION DES PAGES (SÉPARATION STRICTE)
-        function showView(view) {
-            document.getElementById('loader').classList.add('hidden');
-            document.getElementById('section-auth').classList.add('hidden');
-            document.getElementById('section-app').classList.add('hidden');
-            
-            if(view === 'auth') document.getElementById('section-auth').classList.remove('hidden');
-            if(view === 'app') document.getElementById('section-app').classList.remove('hidden');
-        }
+  <button onclick="submitAuth()">Valider</button>
+  <button onclick="toggleMode()">Déjà un compte ?</button>
+</div>
 
-        // 2. VÉRIFICATION AUTOMATIQUE
-        async function checkUser() {
-            const { data: { session } } = await _sb.auth.getSession();
-            if (session) {
-                document.getElementById('user-display').innerText = session.user.email;
-                showView('app');
-            } else {
-                showView('auth');
-            }
-        }
+<!-- HOME -->
+<div id="homeView" class="hidden">
+  <button onclick="showProfile()">Mon profil</button>
+  <button onclick="logout()">Logout</button>
 
-        // 3. AUTHENTIFICATION SIMPLE
-        async function auth(type) {
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-            
-            if(type === 'signup') {
-                const { data, error } = await _sb.auth.signUp({ 
-                    email, 
-                    password: pass,
-                    options: { data: { full_name: document.getElementById('reg-name').value } }
-                });
-                if(error) alert(error.message);
-                else alert("Compte créé !");
-            } else {
-                const { error } = await _sb.auth.signInWithPassword({ email, password: pass });
-                if(error) alert("Erreur : Vérifiez vos identifiants.");
-            }
-            checkUser();
-        }
+  <h2>Catalogue</h2>
+  <div id="gallery" class="grid"></div>
+</div>
 
-        async function logout() {
-            await _sb.auth.signOut();
-            location.reload();
-        }
+<!-- PROFILE -->
+<div id="profileView" class="hidden">
+  <button onclick="showHome()">← Retour</button>
+  <h2>Ajouter une œuvre</h2>
 
-        window.onload = checkUser;
-    </script>
+  <input type="file" id="fileInput">
+  <button onclick="uploadImage()">Uploader</button>
+</div>
+
+</div>
+
+<script>
+const supabase = window.supabase.createClient(
+  "https://gjinqdhodzlsjsjnnydl.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqaW5xZGhvZHpsc2pzam5ueWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODM2NjgsImV4cCI6MjA4NzM1OTY2OH0.7BH1cGi43_hX6FokAiTmH76tgKtqrgM8urCN_bNJurI"
+)
+
+let isSignup = true
+let currentUser = null
+
+function show(view) {
+  authView.classList.add("hidden")
+  homeView.classList.add("hidden")
+  profileView.classList.add("hidden")
+  view.classList.remove("hidden")
+}
+
+function toggleMode() {
+  isSignup = !isSignup
+  authTitle.innerText = isSignup ? "Inscription" : "Connexion"
+  fullName.style.display = isSignup ? "block" : "none"
+  phone.style.display = isSignup ? "block" : "none"
+}
+
+async function submitAuth() {
+  const emailVal = email.value
+  const passwordVal = password.value
+
+  if (isSignup) {
+    const { data, error } = await supabase.auth.signUp({
+      email: emailVal,
+      password: passwordVal
+    })
+
+    if (error) return alert(error.message)
+
+    await supabase.from("profiles").insert({
+      id: data.user.id,
+      full_name: fullName.value,
+      phone: phone.value
+    })
+
+    alert("Compte créé ✔")
+  } else {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: emailVal,
+      password: passwordVal
+    })
+    if (error) alert(error.message)
+  }
+}
+
+async function logout() {
+  await supabase.auth.signOut()
+}
+
+function showProfile() { show(profileView) }
+function showHome() { loadGallery(); show(homeView) }
+
+async function loadGallery() {
+  const { data } = await supabase
+    .from("portfolio_items")
+    .select("*, profiles(phone)")
+    .order("created_at", { ascending: false })
+
+  gallery.innerHTML = ""
+
+  data?.forEach(item => {
+    const phone = item.profiles?.phone?.replace(/\D/g, "") || ""
+    const card = document.createElement("div")
+    card.className = "card"
+
+    card.innerHTML = `
+      <img src="${item.image_url}">
+      <a href="https://wa.me/${phone}" target="_blank">Contacter</a>
+    `
+    gallery.appendChild(card)
+  })
+}
+
+async function uploadImage() {
+  const file = fileInput.files[0]
+  if (!file) return
+
+  const path = `user-${currentUser.id}/${Date.now()}-${file.name}`
+
+  const { error } = await supabase.storage
+    .from("portfolio")
+    .upload(path, file)
+
+  if (error) return alert(error.message)
+
+  const { data } = supabase.storage
+    .from("portfolio")
+    .getPublicUrl(path)
+
+  await supabase.from("portfolio_items").insert({
+    user_id: currentUser.id,
+    image_url: data.publicUrl
+  })
+
+  alert("Image ajoutée ✔")
+}
+
+supabase.auth.getSession().then(({ data }) => {
+  currentUser = data.session?.user ?? null
+  if (currentUser) showHome()
+  else show(authView)
+})
+
+supabase.auth.onAuthStateChange((event, session) => {
+  currentUser = session?.user ?? null
+  if (currentUser) showHome()
+  else show(authView)
+})
+</script>
 </body>
 </html>
-
