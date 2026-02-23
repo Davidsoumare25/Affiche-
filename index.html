@@ -7,17 +7,20 @@
 
 <style>
 :root{
-  --primary:#6c63ff;
-  --bg:#f6f7fb;
+  --blue1:#0f172a;
+  --blue2:#1e3a8a;
+  --blue3:#2563eb;
+  --bg:#f1f5f9;
 }
 
 body{
   margin:0;
-  font-family:system-ui,sans-serif;
+  font-family:system-ui, sans-serif;
   background:var(--bg);
+  font-size:18px;
+  color:#111;
 }
 
-/* VIEWS */
 .hidden{display:none}
 
 /* LANDING */
@@ -26,33 +29,47 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(135deg,#6c63ff,#8f94fb);
+  background:linear-gradient(135deg,var(--blue1),var(--blue2),var(--blue3));
   color:white;
   text-align:center;
-  padding:20px;
+  padding:30px;
 }
 
 .landing-box{
-  max-width:420px;
+  max-width:520px;
 }
 
 .landing-box h1{
-  font-size:38px;
+  font-size:48px;
   margin-bottom:10px;
+}
+
+.landing-box p{
+  font-size:20px;
+  opacity:0.9;
 }
 
 button{
   width:100%;
-  padding:14px;
+  padding:16px;
   border:none;
-  border-radius:10px;
-  margin-top:12px;
+  border-radius:12px;
+  margin-top:14px;
+  font-size:18px;
   font-weight:600;
   cursor:pointer;
 }
 
-.primary{background:white;color:#6c63ff}
-.secondary{background:transparent;color:white;border:2px solid white}
+.primary{
+  background:white;
+  color:#1e3a8a;
+}
+
+.secondary{
+  background:transparent;
+  color:white;
+  border:2px solid white;
+}
 
 /* AUTH */
 #authView{
@@ -60,85 +77,95 @@ button{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:20px;
+  padding:30px;
 }
 
 .card{
   background:white;
-  padding:28px;
-  border-radius:16px;
+  padding:36px;
+  border-radius:18px;
   width:100%;
-  max-width:420px;
-  box-shadow:0 15px 40px rgba(0,0,0,0.08);
+  max-width:480px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.1);
+}
+
+.card h2{
+  font-size:28px;
 }
 
 input,select{
   width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
+  padding:14px;
+  margin-top:12px;
+  border-radius:12px;
   border:1px solid #ddd;
+  font-size:17px;
 }
 
 /* HOME */
 .container{
   max-width:1200px;
   margin:auto;
-  padding:20px;
+  padding:24px;
 }
 
 .header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:20px;
+  margin-bottom:24px;
+}
+
+.header h2{
+  font-size:28px;
+  color:#1e3a8a;
 }
 
 .menu-btn{
   display:none;
 }
 
-@media(max-width:900px){
-  .menu-btn{display:block}
-  .sidebar{display:none}
-  .sidebar.open{display:block}
-}
-
 .layout{
   display:grid;
-  grid-template-columns:240px 1fr;
-  gap:20px;
-}
-
-@media(max-width:900px){
-  .layout{grid-template-columns:1fr}
+  grid-template-columns:260px 1fr;
+  gap:24px;
 }
 
 .sidebar{
   background:white;
-  padding:16px;
-  border-radius:12px;
+  padding:18px;
+  border-radius:14px;
 }
 
-/* GALLERY */
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:16px;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:18px;
 }
 
 .art{
   background:white;
-  padding:10px;
-  border-radius:12px;
+  padding:12px;
+  border-radius:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.05);
 }
 
 .art img{
   width:100%;
-  height:220px;
+  height:240px;
   object-fit:contain;
-  background:#f2f2f2;
-  border-radius:8px;
+  background:#f1f5f9;
+  border-radius:10px;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+  body{font-size:17px}
+  .landing-box h1{font-size:36px}
+  .layout{grid-template-columns:1fr}
+  .menu-btn{display:block}
+  .sidebar{display:none}
+  .sidebar.open{display:block}
 }
 </style>
 </head>
@@ -149,7 +176,7 @@ input,select{
 <div id="landing">
   <div class="landing-box">
     <h1>PosterMarket</h1>
-    <p>Marketplace de design d’affiches</p>
+    <p>Marketplace professionnelle pour affiches design</p>
     <button class="primary" onclick="openAuth(true)">Créer un compte</button>
     <button class="secondary" onclick="openAuth(false)">Se connecter</button>
   </div>
@@ -161,8 +188,8 @@ input,select{
     <h2 id="authTitle"></h2>
 
     <select id="role">
-      <option value="designer">Designer (je vends)</option>
-      <option value="client">Client (je commande)</option>
+      <option value="designer">Designer (je vends mes services)</option>
+      <option value="client">Client (je commande une affiche)</option>
     </select>
 
     <input id="fullName" placeholder="Nom complet">
@@ -172,6 +199,7 @@ input,select{
 
     <button onclick="submitAuth()">Continuer</button>
     <button onclick="backLanding()">Retour</button>
+
     <p id="status"></p>
   </div>
 </div>
@@ -187,7 +215,7 @@ input,select{
   <div class="layout">
 
     <div id="sidebar" class="sidebar">
-      <button onclick="showProfile()">Ajouter œuvre</button>
+      <button onclick="showProfile()">Ajouter une œuvre</button>
       <button onclick="logout()">Déconnexion</button>
     </div>
 
@@ -321,6 +349,7 @@ supabase.auth.getSession().then(({data})=>{
   currentUser=data.session?.user??null
   if(currentUser) showHome()
 })
+
 supabase.auth.onAuthStateChange((e,s)=>{
   currentUser=s?.user??null
   if(currentUser) showHome()
