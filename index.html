@@ -6,47 +6,58 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+body, html {
+  margin:0;
+  padding:0;
+  font-family:sans-serif;
+  height:100%;
+  overflow:hidden;
+}
+
 :root{
   --blue1:#0f172a;
   --blue2:#1e3a8a;
   --blue3:#2563eb;
-  --bg:#f1f5f9;
 }
 
 body{
-  margin:0;
-  font-family:system-ui, sans-serif;
-  background:var(--bg);
-  font-size:18px;
-  color:#111;
-}
-
-.hidden{display:none}
-
-/* LANDING */
-#landing{
-  min-height:100vh;
+  background: linear-gradient(270deg, var(--blue1), var(--blue2), var(--blue3));
+  background-size: 600% 600%;
+  animation: gradientBG 15s ease infinite;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(135deg,var(--blue1),var(--blue2),var(--blue3));
+  height:100vh;
+  font-size:18px;
   color:white;
-  text-align:center;
+}
+
+@keyframes gradientBG {
+  0% {background-position:0% 50%;}
+  50% {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
+
+.card{
+  background: rgba(255,255,255,0.95);
   padding:30px;
+  border-radius:20px;
+  width:90%;
+  max-width:400px;
+  text-align:center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.landing-box{
-  max-width:520px;
-}
-
-.landing-box h1{
-  font-size:48px;
+.card h1{
+  font-size:36px;
   margin-bottom:10px;
+  color: #1e3a8a;
 }
 
-.landing-box p{
-  font-size:20px;
-  opacity:0.9;
+.card p{
+  font-size:16px;
+  margin-bottom:20px;
+  opacity:0.8;
 }
 
 button{
@@ -54,186 +65,65 @@ button{
   padding:16px;
   border:none;
   border-radius:12px;
-  margin-top:14px;
+  margin-top:12px;
   font-size:18px;
   font-weight:600;
   cursor:pointer;
 }
 
 .primary{
-  background:white;
-  color:#1e3a8a;
+  background:#1e3a8a;
+  color:white;
 }
 
 .secondary{
   background:transparent;
-  color:white;
-  border:2px solid white;
+  color:#1e3a8a;
+  border:2px solid #1e3a8a;
 }
 
-/* AUTH */
-#authView{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:30px;
-}
-
-.card{
-  background:white;
-  padding:36px;
-  border-radius:18px;
-  width:100%;
-  max-width:480px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.1);
-}
-
-.card h2{
-  font-size:28px;
-}
-
-input,select{
+select,input{
   width:100%;
   padding:14px;
   margin-top:12px;
   border-radius:12px;
   border:1px solid #ddd;
-  font-size:17px;
+  font-size:16px;
 }
 
-/* HOME */
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:24px;
-}
-
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:24px;
-}
-
-.header h2{
-  font-size:28px;
-  color:#1e3a8a;
-}
-
-.menu-btn{
-  display:none;
-}
-
-.layout{
-  display:grid;
-  grid-template-columns:260px 1fr;
-  gap:24px;
-}
-
-.sidebar{
-  background:white;
-  padding:18px;
-  border-radius:14px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-  gap:18px;
-}
-
-.art{
-  background:white;
-  padding:12px;
-  border-radius:14px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.05);
-}
-
-.art img{
-  width:100%;
-  height:240px;
-  object-fit:contain;
-  background:#f1f5f9;
-  border-radius:10px;
-}
-
-/* MOBILE */
-@media(max-width:900px){
-  body{font-size:17px}
-  .landing-box h1{font-size:36px}
-  .layout{grid-template-columns:1fr}
-  .menu-btn{display:block}
-  .sidebar{display:none}
-  .sidebar.open{display:block}
-}
+/* cacher les sections */
+.hidden{display:none;}
 </style>
 </head>
 
 <body>
 
 <!-- LANDING -->
-<div id="landing">
-  <div class="landing-box">
-    <h1>PosterMarket</h1>
-    <p>Marketplace professionnelle pour affiches design</p>
-    <button class="primary" onclick="openAuth(true)">Créer un compte</button>
-    <button class="secondary" onclick="openAuth(false)">Se connecter</button>
-  </div>
+<div id="landing" class="card">
+  <h1>PosterMarket</h1>
+  <p>Marketplace pour designers et clients</p>
+  <button class="primary" onclick="openAuth(true)">Créer un compte</button>
+  <button class="secondary" onclick="openAuth(false)">Se connecter</button>
 </div>
 
 <!-- AUTH -->
-<div id="authView" class="hidden">
-  <div class="card">
-    <h2 id="authTitle"></h2>
+<div id="authView" class="card hidden">
+  <h2 id="authTitle"></h2>
 
-    <select id="role">
-      <option value="designer">Designer (je vends mes services)</option>
-      <option value="client">Client (je commande une affiche)</option>
-    </select>
+  <select id="role">
+    <option value="designer">Designer (je vends mes services)</option>
+    <option value="client">Client (je commande une affiche)</option>
+  </select>
 
-    <input id="fullName" placeholder="Nom complet">
-    <input id="phone" placeholder="Téléphone WhatsApp">
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Mot de passe">
+  <input id="fullName" placeholder="Nom complet">
+  <input id="phone" placeholder="Téléphone WhatsApp">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Mot de passe">
 
-    <button onclick="submitAuth()">Continuer</button>
-    <button onclick="backLanding()">Retour</button>
+  <button onclick="submitAuth()">Continuer</button>
+  <button onclick="backLanding()">Retour</button>
 
-    <p id="status"></p>
-  </div>
-</div>
-
-<!-- HOME -->
-<div id="homeView" class="hidden container">
-
-  <div class="header">
-    <h2>PosterMarket</h2>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  </div>
-
-  <div class="layout">
-
-    <div id="sidebar" class="sidebar">
-      <button onclick="showProfile()">Ajouter une œuvre</button>
-      <button onclick="logout()">Déconnexion</button>
-    </div>
-
-    <div>
-      <div id="gallery" class="grid"></div>
-    </div>
-
-  </div>
-</div>
-
-<!-- PROFILE -->
-<div id="profileView" class="hidden container">
-  <div class="card">
-    <h3>Nouvelle œuvre</h3>
-    <input type="file" id="fileInput">
-    <button onclick="uploadImage()">Uploader</button>
-    <button onclick="showHome()">Retour</button>
-  </div>
+  <p id="status"></p>
 </div>
 
 <script>
@@ -248,8 +138,6 @@ let isSignup=true
 function show(v){
   landing.classList.add("hidden")
   authView.classList.add("hidden")
-  homeView.classList.add("hidden")
-  profileView.classList.add("hidden")
   v.classList.remove("hidden")
 }
 
@@ -260,8 +148,6 @@ function openAuth(signup){
 }
 
 function backLanding(){show(landing)}
-
-function toggleMenu(){sidebar.classList.toggle("open")}
 
 function setStatus(m){status.innerText=m}
 
@@ -296,63 +182,11 @@ async function submitAuth(){
   }
 }
 
-async function logout(){
-  await supabase.auth.signOut()
-}
-
-function showProfile(){show(profileView)}
-
-async function showHome(){
-  await loadGallery()
-  show(homeView)
-}
-
-async function loadGallery(){
-  const {data}=await supabase
-    .from("portfolio_items")
-    .select("*, profiles(phone)")
-
-  gallery.innerHTML=""
-
-  data?.forEach(item=>{
-    const phone=item.profiles?.phone?.replace(/\D/g,"")||""
-    gallery.innerHTML+=`
-      <div class="art">
-        <img src="${item.image_url}">
-        <a href="https://wa.me/${phone}" target="_blank">
-          <button>Contacter</button>
-        </a>
-      </div>
-    `
-  })
-}
-
-async function uploadImage(){
-  const file=fileInput.files[0]
-  if(!file) return
-
-  const path=`user-${currentUser.id}/${Date.now()}-${file.name}`
-
-  await supabase.storage.from("portfolio").upload(path,file)
-
-  const {data}=supabase.storage.from("portfolio").getPublicUrl(path)
-
-  await supabase.from("portfolio_items").insert({
-    user_id:currentUser.id,
-    image_url:data.publicUrl
-  })
-
-  showHome()
-}
-
 supabase.auth.getSession().then(({data})=>{
   currentUser=data.session?.user??null
-  if(currentUser) showHome()
 })
-
 supabase.auth.onAuthStateChange((e,s)=>{
   currentUser=s?.user??null
-  if(currentUser) showHome()
 })
 </script>
 
