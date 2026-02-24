@@ -1,128 +1,173 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>PosterMarket</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-body, html {
-  margin:0; padding:0; font-family:sans-serif; height:100%; overflow:hidden;
-}
-:root{
-  --blue1:#0f172a; --blue2:#1e3a8a; --blue3:#2563eb;
-}
-body{
-  background: linear-gradient(270deg, var(--blue1), var(--blue2), var(--blue3));
-  background-size: 600% 600%;
-  animation: gradientBG 15s ease infinite;
-  display:flex; align-items:center; justify-content:center;
-  height:100vh; font-size:18px; color:white;
-}
-@keyframes gradientBG {
-  0% {background-position:0% 50%;}
-  50% {background-position:100% 50%;}
-  100% {background-position:0% 50%;}
-}
-.card{
-  background: rgba(255,255,255,0.95); padding:30px; border-radius:20px;
-  width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-.card h1, .card h2{color: #1e3a8a; margin-bottom:10px;}
-.card p{font-size:16px; margin-bottom:20px; opacity:0.8;}
-button{width:100%; padding:16px; border:none; border-radius:12px; margin-top:12px; font-size:18px; font-weight:600; cursor:pointer;}
-.primary{background:#1e3a8a;color:white;}
-.secondary{background:transparent;color:#1e3a8a;border:2px solid #1e3a8a;}
-select,input{width:100%; padding:14px; margin-top:12px; border-radius:12px; border:1px solid #ddd; font-size:16px;}
-.hidden{display:none;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PosterMarket</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body, html { margin:0; padding:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height:100%; }
+        :root { --blue1:#0f172a; --blue2:#1e3a8a; --blue3:#2563eb; }
+        
+        body {
+            background: linear-gradient(270deg, var(--blue1), var(--blue2), var(--blue3));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display:flex; align-items:center; justify-content:center;
+            color:white;
+        }
+
+        @keyframes gradientBG { 0% {background-position:0% 50%;} 50% {background-position:100% 50%;} 100% {background-position:0% 50%;} }
+
+        .card {
+            background: rgba(255,255,255,0.98); padding:30px; border-radius:24px;
+            width:90%; max-width:400px; text-align:center; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            color: #1e293b; transition: all 0.3s ease;
+        }
+
+        h1 { color: #1e3a8a; font-weight: 800; italic; margin-bottom: 5px; }
+        .card p { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+
+        input, select {
+            width: 100%; padding: 14px; margin-top: 10px; border-radius: 12px;
+            border: 1px solid #e2e8f0; font-size: 16px; box-sizing: border-box;
+        }
+
+        button {
+            width:100%; padding:16px; border:none; border-radius:12px;
+            margin-top:15px; font-size:16px; font-weight:700; cursor:pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .primary { background:#2563eb; color:white; }
+        .secondary { background:#f1f5f9; color:#1e3a8a; }
+        button:active { transform: scale(0.98); }
+
+        .status { margin-top: 15px; font-size: 12px; font-weight: bold; }
+        .error { color: #ef4444; }
+        .success { color: #22c55e; }
+        .hidden { display: none !important; }
+
+        /* Interface App */
+        #appView { width: 95%; max-width: 800px; background: white; color: black; border-radius: 20px; padding: 20px; height: 80vh; overflow-y: auto; }
+    </style>
 </head>
 <body>
 
-<!-- LANDING -->
-<div id="landing" class="card">
-  <h1>PosterMarket</h1>
-  <p>Marketplace pour designers et clients</p>
-  <button class="primary" id="btnSignup">Créer un compte</button>
-  <button class="secondary" id="btnLogin">Se connecter</button>
-</div>
+    <div id="authContainer" class="card">
+        <h1>PosterMarket</h1>
+        <p id="subTitle">Marketplace pour designers pro</p>
 
-<!-- AUTH -->
-<div id="authView" class="card hidden">
-  <h2 id="authTitle"></h2>
+        <div id="inputsContainer">
+            <div id="signupFields" class="hidden">
+                <select id="role">
+                    <option value="designer">Je suis Designer</option>
+                    <option value="client">Je suis Client</option>
+                </select>
+                <input id="fullName" placeholder="Nom complet">
+                <input id="phone" placeholder="Numéro WhatsApp">
+            </div>
+            
+            <input id="email" type="email" placeholder="Email">
+            <input id="password" type="password" placeholder="Mot de passe">
+        </div>
 
-  <select id="role">
-    <option value="designer">Designer (je vends mes services)</option>
-    <option value="client">Client (je commande une affiche)</option>
-  </select>
+        <button class="primary" id="btnSubmit">Continuer</button>
+        <button class="secondary" id="btnToggle">Se connecter</button>
+        
+        <div id="statusMsg" class="status"></div>
+    </div>
 
-  <input id="fullName" placeholder="Nom complet">
-  <input id="phone" placeholder="Téléphone WhatsApp">
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Mot de passe">
-
-  <button id="btnSubmit">Continuer</button>
-  <button onclick="backLanding()">Retour</button>
-  <p id="status"></p>
-</div>
+    <div id="appView" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; pb:10px;">
+            <h2 style="color:#2563eb">PM Connecté</h2>
+            <button onclick="logout()" style="width:auto; padding:8px 15px; background:#fee2e2; color:#b91c1c; margin:0;">Déconnexion</button>
+        </div>
+        <div id="userWelcome" style="padding:20px 0;">
+            <h3>Bienvenue dans votre catalogue</h3>
+            <p>Vous pouvez maintenant configurer votre profil de designer.</p>
+        </div>
+    </div>
 
 <script>
-const supabase = window.supabase.createClient(
-  "https://lqevweyhxkvnckhtfpwh.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw"
-);
+    // TES CLES (A vérifier dans Supabase > Settings > API)
+    const SB_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
+    const supabase = window.supabase.createClient(SB_URL, SB_KEY);
 
-let currentUser=null;
-let isSignup=true;
+    let isSignupMode = true;
 
-const landing=document.getElementById("landing");
-const authView=document.getElementById("authView");
-const authTitle=document.getElementById("authTitle");
-const fullName=document.getElementById("fullName");
-const phone=document.getElementById("phone");
-const email=document.getElementById("email");
-const password=document.getElementById("password");
-const role=document.getElementById("role");
-const status=document.getElementById("status");
-const btnSubmit=document.getElementById("btnSubmit");
+    // Éléments
+    const authContainer = document.getElementById("authContainer");
+    const signupFields = document.getElementById("signupFields");
+    const appView = document.getElementById("appView");
+    const btnSubmit = document.getElementById("btnSubmit");
+    const btnToggle = document.getElementById("btnToggle");
+    const statusMsg = document.getElementById("statusMsg");
 
-function show(v){ landing.classList.add("hidden"); authView.classList.add("hidden"); v.classList.remove("hidden"); }
-function openAuth(signup){ isSignup=signup; authTitle.innerText=signup?"Créer un compte":"Connexion"; show(authView); }
-function backLanding(){show(landing);}
-function setStatus(m){status.innerText=m;}
+    // Basculer entre Inscription et Connexion
+    btnToggle.onclick = () => {
+        isSignupMode = !isSignupMode;
+        signupFields.classList.toggle("hidden", !isSignupMode);
+        document.getElementById("subTitle").innerText = isSignupMode ? "Créez votre compte" : "Bon retour parmi nous";
+        btnSubmit.innerText = isSignupMode ? "S'inscrire" : "Entrer";
+        btnToggle.innerText = isSignupMode ? "Déjà membre ? Connexion" : "Nouveau ? Créer un compte";
+        statusMsg.innerText = "";
+    };
 
-// Boutons Landing
-document.getElementById("btnSignup").onclick=()=>openAuth(true);
-document.getElementById("btnLogin").onclick=()=>openAuth(false);
+    // Action Principale
+    btnSubmit.onclick = async () => {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        statusMsg.className = "status";
+        statusMsg.innerText = "Chargement...";
 
-// Bouton soumission
-btnSubmit.onclick=async()=>{
-  const emailVal=email.value.trim();
-  const passwordVal=password.value.trim();
-  if(!emailVal || !passwordVal){ setStatus("Email et mot de passe requis"); return; }
+        if (isSignupMode) {
+            // INSCRIPTION
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            if (error) {
+                statusMsg.innerText = error.message;
+                statusMsg.classList.add("error");
+            } else {
+                // Sauvegarder le profil
+                await supabase.from("profiles").insert({
+                    id: data.user.id,
+                    full_name: document.getElementById("fullName").value,
+                    phone: document.getElementById("phone").value,
+                    role: document.getElementById("role").value
+                });
+                statusMsg.innerText = "Compte créé ! Connectez-vous maintenant.";
+                statusMsg.classList.add("success");
+                btnToggle.click(); // Bascule en mode login
+            }
+        } else {
+            // CONNEXION
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                statusMsg.innerText = "Identifiants invalides ou erreur de clé.";
+                statusMsg.classList.add("error");
+            }
+            // onAuthStateChange s'occupera de la redirection
+        }
+    };
 
-  if(isSignup){
-    const {data,error}=await supabase.auth.signUp({email:emailVal,password:passwordVal});
-    if(error){ setStatus(error.message); return; }
-    if(data.user){
-      await supabase.from("profiles").insert({
-        id:data.user.id,
-        full_name:fullName.value,
-        phone:phone.value,
-        role:role.value
-      });
+    // Gérer la session automatique
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            authContainer.classList.add("hidden");
+            appView.classList.remove("hidden");
+            console.log("Connecté en tant que:", session.user.email);
+        } else {
+            authContainer.classList.remove("hidden");
+            appView.classList.add("hidden");
+        }
+    });
+
+    async function logout() {
+        await supabase.auth.signOut();
     }
-    setStatus("Compte créé ✔ Connecte-toi");
-  }else{
-    const {error}=await supabase.auth.signInWithPassword({email:emailVal,password:passwordVal});
-    if(error){ setStatus(error.message); return; }
-    setStatus("Connexion réussie ✔");
-  }
-};
-
-// Session automatique
-supabase.auth.getSession().then(({data})=>{ currentUser=data.session?.user??null; });
-supabase.auth.onAuthStateChange((e,s)=>{ currentUser=s?.user??null; });
 </script>
 
 </body>
 </html>
+
