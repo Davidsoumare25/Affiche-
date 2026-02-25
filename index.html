@@ -3,80 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PosterMarket Pro</title>
+    <title>PosterMarket</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .page { display: none; }
-        .page.active { display: block; }
-        body { background: #f8fafc; font-family: sans-serif; }
+        /* TON DESIGN QUE TU ADORES - NE PAS MODIFIER */
+        body, html { margin:0; padding:0; font-family:sans-serif; height:100%; overflow:hidden; }
+        :root{ --blue1:#0f172a; --blue2:#1e3a8a; --blue3:#2563eb; }
+        body{
+            background: linear-gradient(270deg, var(--blue1), var(--blue2), var(--blue3));
+            background-size: 600% 600%;
+            animation: gradientBG 15s ease infinite;
+            display:flex; align-items:center; justify-content:center;
+            height:100vh; font-size:18px; color:white;
+        }
+        @keyframes gradientBG { 0% {background-position:0% 50%;} 50% {background-position:100% 50%;} 100% {background-position:0% 50%;} }
+        .card{
+            background: rgba(255,255,255,0.95); padding:30px; border-radius:20px;
+            width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: #1e3a8a;
+        }
+        .card h1 { margin-bottom:10px; font-style: italic; }
+        button{ width:100%; padding:16px; border:none; border-radius:12px; margin-top:12px; font-size:18px; font-weight:600; cursor:pointer; transition: 0.3s; }
+        .primary{ background:#2563eb; color:white; }
+        .secondary{ background:#f1f5f9; color:#1e3a8a; }
+        input{ width:100%; padding:14px; margin-top:12px; border-radius:12px; border:1px solid #ddd; font-size:16px; box-sizing: border-box; }
+        .status { font-size: 12px; margin-top: 10px; font-weight: bold; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="loader" class="fixed inset-0 bg-white flex items-center justify-center z-50">
-        <div class="text-indigo-600 font-bold animate-bounce text-xl">PosterMarket...</div>
+    <div id="loader" class="card">
+        <p>Vérification de session...</p>
     </div>
 
-    <div id="view-auth" class="page min-h-screen flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-gray-100">
-            <h1 class="text-3xl font-black text-indigo-600 mb-2 italic">PosterMarket</h1>
-            <p id="auth-subtitle" class="text-gray-400 mb-6 text-sm">Crée ton catalogue de designer</p>
-            
-            <div class="space-y-4">
-                <div id="signup-only" class="space-y-4">
-                    <input type="text" id="reg-name" placeholder="Nom Complet" class="w-full p-4 bg-gray-50 rounded-2xl outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-indigo-500">
-                    <input type="tel" id="reg-phone" placeholder="Numéro WhatsApp" class="w-full p-4 bg-gray-50 rounded-2xl outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <input type="email" id="reg-email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-2xl outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-indigo-500">
-                <input type="password" id="reg-pass" placeholder="Mot de passe" class="w-full p-4 bg-gray-50 rounded-2xl outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-indigo-500">
-                
-                <button onclick="handleAuth()" id="btn-main" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition">Créer mon compte</button>
-                <button onclick="toggleAuth()" id="btn-switch" class="w-full py-2 text-gray-400 text-sm font-bold">Déjà inscrit ? Se connecter</button>
-            </div>
-            <p id="status" class="text-red-500 text-xs mt-4 font-bold text-center uppercase"></p>
-        </div>
-    </div>
-
-    <div id="view-app" class="page">
-        <nav class="bg-white p-4 border-b flex justify-between items-center sticky top-0">
-            <span class="font-black text-indigo-600 italic text-xl">PM</span>
-            <button onclick="logout()" class="text-red-400 font-bold text-sm">Quitter</button>
-        </nav>
+    <div id="authView" class="card hidden">
+        <h1>PosterMarket</h1>
+        <p id="subTitle">Rejoignez la communauté</p>
         
-        <div class="p-6 max-w-lg mx-auto text-center">
-            <h2 class="text-2xl font-black mb-4">Espace Designer</h2>
-            <div class="bg-indigo-50 p-6 rounded-3xl border-2 border-dashed border-indigo-200">
-                <p class="text-indigo-600 font-bold mb-4">Ton catalogue est vide</p>
-                <button class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold">+ Ajouter une affiche</button>
-            </div>
+        <div id="inputs">
+            <input id="email" type="email" placeholder="Email">
+            <input id="password" type="password" placeholder="Mot de passe">
         </div>
+
+        <button class="primary" id="btnAction">Se connecter</button>
+        <button class="secondary" id="btnToggle">Nouveau ? S'inscrire</button>
+        
+        <p id="statusMsg" class="status"></p>
     </div>
 
-    <script>
-// Remplace par l'URL tout en haut de ton interface Supabase
-const SB_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co"; 
+    <div id="appView" class="card hidden">
+        <h1>Espace Vendeur</h1>
+        <p>Bienvenue sur votre tableau de bord.</p>
+        <button class="secondary" onclick="logout()">Se déconnecter</button>
+    </div>
 
-// COPIE LA CLÉ DE TA CAPTURE 1000002085.jpg (celle qui commence par eyJhbG...)
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw"; 
+<script>
+    // CONFIGURATION AVEC TES CLÉS RÉCUPÉRÉES
+    const SB_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co"; 
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
+    const _sb = supabase.createClient(SB_URL, SB_KEY);
 
-const supabase = window.supabase.createClient(SB_URL, SB_KEY);
+    let isSignup = false;
 
+    // ÉLÉMENTS DU DOM
+    const authView = document.getElementById('authView');
+    const appView = document.getElementById('appView');
+    const loader = document.getElementById('loader');
+    const statusMsg = document.getElementById('statusMsg');
 
-        // --- GESTION DE LA SESSION AUTOMATIQUE ---
-        _sb.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                showPage('view-app');
-            } else {
-                showPage('view-auth');
-            }
-        });
-
-        async function logout() {
-            await _sb.auth.signOut();
-            location.reload();
+    // 1. GESTION DE LA SESSION AUTOMATIQUE
+    _sb.auth.onAuthStateChange((event, session) => {
+        loader.classList.add('hidden');
+        if (session) {
+            authView.classList.add('hidden');
+            appView.classList.remove('hidden');
+        } else {
+            authView.classList.remove('hidden');
+            appView.classList.add('hidden');
         }
-    </script>
+    });
+
+    // 2. BASCULER ENTRE CONNEXION ET INSCRIPTION
+    document.getElementById('btnToggle').onclick = () => {
+        isSignup = !isSignup;
+        document.getElementById('btnAction').innerText = isSignup ? "S'inscrire" : "Se connecter";
+        document.getElementById('btnToggle').innerText = isSignup ? "Déjà membre ? Connexion" : "Nouveau ? S'inscrire";
+        statusMsg.innerText = "";
+    };
+
+    // 3. ACTION PRINCIPALE (S'INSCRIRE OU SE CONNECTER)
+    document.getElementById('btnAction').onclick = async () => {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        statusMsg.innerText = "Chargement...";
+
+        if (isSignup) {
+            const { error } = await _sb.auth.signUp({ email, password });
+            if (error) statusMsg.innerText = "Erreur : " + error.message;
+            else statusMsg.innerText = "Compte créé ! Vérifiez vos emails ou connectez-vous.";
+        } else {
+            const { error } = await _sb.auth.signInWithPassword({ email, password });
+            if (error) statusMsg.innerText = "Erreur : Clé API ou Identifiants invalides.";
+        }
+    };
+
+    // 4. DÉCONNEXION
+    async function logout() {
+        await _sb.auth.signOut();
+    }
+</script>
+
 </body>
 </html>
-
