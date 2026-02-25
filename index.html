@@ -54,53 +54,14 @@
     </div>
 
     <script>
-        // --- CONFIGURATION (IMPORTANT : Vérifie ces clés dans Supabase !) ---
-        const SB_URL = "https://gjinqdhodzlsjsjnnydl.supabase.co"; 
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqaW5xZGhvZHpsc2pzam5ueWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODM2NjgsImV4cCI6MjA4NzM1OTY2OH0.7BH1cGi43_hX6FokAiTmH76tgKtqrgM8urCN_bNJurIzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
-        const _sb = supabase.createClient(SB_URL, SB_KEY);
+// Remplace par l'URL tout en haut de ton interface Supabase
+const SB_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co"; 
 
-        let isLoginMode = false;
+// COPIE LA CLÉ DE TA CAPTURE 1000002085.jpg (celle qui commence par eyJhbG...)
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw"; 
 
-        function showPage(id) {
-            document.getElementById('loader').style.display = 'none';
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
+const supabase = window.supabase.createClient(SB_URL, SB_KEY);
 
-        function toggleAuth() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('signup-only').style.display = isLoginMode ? 'none' : 'block';
-            document.getElementById('auth-subtitle').innerText = isLoginMode ? "Bon retour !" : "Crée ton catalogue de designer";
-            document.getElementById('btn-main').innerText = isLoginMode ? "Se connecter" : "Créer mon compte";
-            document.getElementById('btn-switch').innerText = isLoginMode ? "Nouveau ? Créer un compte" : "Déjà inscrit ? Se connecter";
-        }
-
-        async function handleAuth() {
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-pass').value;
-            const status = document.getElementById('status');
-            status.innerText = "Chargement...";
-
-            if (isLoginMode) {
-                const { error } = await _sb.auth.signInWithPassword({ email, password });
-                if (error) status.innerText = "Erreur : " + error.message;
-            } else {
-                const { data, error } = await _sb.auth.signUp({ email, password });
-                if (error) {
-                    status.innerText = "Erreur : " + error.message;
-                } else {
-                    // Création du profil dans la table
-                    await _sb.from('profiles').upsert({
-                        id: data.user.id,
-                        full_name: document.getElementById('reg-name').value,
-                        phone: document.getElementById('reg-phone').value,
-                        role: 'designer'
-                    });
-                    status.innerText = "Compte créé ! Connecte-toi.";
-                    toggleAuth();
-                }
-            }
-        }
 
         // --- GESTION DE LA SESSION AUTOMATIQUE ---
         _sb.auth.onAuthStateChange((event, session) => {
