@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PosterMarket | Inscription</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body, html { margin:0; padding:0; font-family:sans-serif; height:100%; overflow:hidden; }
+        :root{ --blue1:#0f172a; --blue2:#1e3a8a; --blue3:#2563eb; }
+        body{
+            background: linear-gradient(270deg, var(--blue1), var(--blue2), var(--blue3));
+            background-size: 600% 600%;
+            animation: gradientBG 15s ease infinite;
+            display:flex; align-items:center; justify-content:center;
+            height:100vh; color:white;
+        }
+        @keyframes gradientBG { 0% {background-position:0% 50%;} 50% {background-position:100% 50%;} 100% {background-position:0% 50%;} }
+        .card{
+            background: rgba(255,255,255,0.95); padding:30px; border-radius:20px;
+            width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: #1e3a8a;
+        }
+        h1 { margin-bottom: 10px; font-style: italic; color: #2563eb; }
+        input{ width:100%; padding:14px; margin-top:12px; border-radius:12px; border:1px solid #ddd; font-size:16px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #2563eb; ring: 2px solid #2563eb; }
+        button{ width:100%; padding:16px; border:none; border-radius:12px; margin-top:20px; font-size:18px; font-weight:600; cursor:pointer; background:#2563eb; color:white; transition: 0.3s; }
+        button:hover { background: #1e3a8a; }
+        .status { font-size: 13px; margin-top: 15px; font-weight: bold; min-height: 20px; }
+        a { color: #2563eb; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>PosterMarket</h1>
+        <p style="color: #666;">Créez votre profil designer</p>
+        
+        <input id="email" type="email" placeholder="Email (ex: nom@mail.com)">
+        <input id="password" type="password" placeholder="Mot de passe (6 caractères min.)">
+
+        <button onclick="handleSignUp()">S'inscrire gratuitement</button>
+        
+        <div id="statusMsg" class="status"></div>
+        
+        <p style="color: #666; font-size: 14px; margin-top: 15px;">
+            Déjà un compte ? <a href="index.html">Se connecter</a>
+        </p>
+    </div>
+
+<script>
+    // Configuration Supabase
+    const SB_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
+    const _sb = supabase.createClient(SB_URL, SB_KEY);
+
+    async function handleSignUp() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const status = document.getElementById('statusMsg');
+
+        if (!email || !password) {
+            status.style.color = "red";
+            status.innerText = "Veuillez remplir tous les champs.";
+            return;
+        }
+
+        status.style.color = "#2563eb";
+        status.innerText = "Création du compte en cours...";
+
+        try {
+            // 1. Inscription dans Supabase Auth
+            const { data, error } = await _sb.auth.signUp({ 
+                email: email, 
+                password: password 
+            });
+
+            if (error) throw error;
+
+            if (data.user) {
+                status.innerText = "Compte créé ! Initialisation du profil...";
+
+                // 2. Création de la ligne dans la table 'profiles'
+                // On utilise l'ID généré par l'Auth pour lier les deux
+                const { error: tableError } = await _sb
+                    .from('profiles')
+                    .insert([
+                        { 
+                            id: data.user.id, 
+                            role: 'designer',
+                            updated_at: new Date()
+                        }
+                    ]);
+
+                if (tableError) {
+                    console.error("Erreur table:", tableError);
+                    status.style.color = "orange";
+                    status.innerText = "Compte OK, mais profil non créé. Contactez le support.";
+                } else {
+                    status.style.color = "green";
+                    status.innerText = "Succès ! Redirection vers l'accueil...";
+                    // Petite pause pour laisser l'utilisateur voir le message
+                    setTimeout(() => { window.location.href = "home.html"; }, 2000);
+                }
+            }
+        } catch (err) {
+            console.error("Erreur complète:", err);
+            status.style.color = "red";
+            // Si l'erreur contient "fetch", c'est souvent un problème de CORS ou AdBlock
+            if (err.message.includes('fetch')) {
+                status.innerText = "Erreur réseau (Fetch). Désactivez votre VPN ou AdBlock.";
+            } else {
+                status.innerText = "Erreur : " + err.message;
+            }
+        }
+    }
+</script>
+</body>
+</html>
+
