@@ -2,117 +2,220 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PosterMarket</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sénégal Scolaire OS</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ma Moyenne">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* TON DESIGN QUE TU ADORES - NE PAS MODIFIER */
-        body, html { margin:0; padding:0; font-family:sans-serif; height:100%; overflow:hidden; }
-        :root{ --blue1:#0f172a; --blue2:#1e3a8a; --blue3:#2563eb; }
-        body{
-            background: linear-gradient(270deg, var(--blue1), var(--blue2), var(--blue3));
-            background-size: 600% 600%;
-            animation: gradientBG 15s ease infinite;
-            display:flex; align-items:center; justify-content:center;
-            height:100vh; font-size:18px; color:white;
+        :root {
+            --sn-green: #00853f; --sn-yellow: #fdef42; --sn-red: #e31b23;
+            --dock-bg: rgba(255, 255, 255, 0.4); --card-bg: rgba(255, 255, 255, 0.95); --text-color: #000;
         }
-        @keyframes gradientBG { 0% {background-position:0% 50%;} 50% {background-position:100% 50%;} 100% {background-position:0% 50%;} }
-        .card{
-            background: rgba(255,255,255,0.95); padding:30px; border-radius:20px;
-            width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            color: #1e3a8a;
+        .dark-mode {
+            --sn-green: #004d25; --sn-yellow: #b3a700; --sn-red: #8b1116;
+            --dock-bg: rgba(0, 0, 0, 0.6); --card-bg: rgba(30, 30, 30, 0.95); --text-color: #fff;
         }
-        .card h1 { margin-bottom:10px; font-style: italic; }
-        button{ width:100%; padding:16px; border:none; border-radius:12px; margin-top:12px; font-size:18px; font-weight:600; cursor:pointer; transition: 0.3s; }
-        .primary{ background:#2563eb; color:white; }
-        .secondary{ background:#f1f5f9; color:#1e3a8a; }
-        input{ width:100%; padding:14px; margin-top:12px; border-radius:12px; border:1px solid #ddd; font-size:16px; box-sizing: border-box; }
-        .status { font-size: 12px; margin-top: 10px; font-weight: bold; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0;
+            background: linear-gradient(135deg, var(--sn-green), var(--sn-yellow), var(--sn-red));
+            background-attachment: fixed; min-height: 100vh; padding-bottom: 180px; color: var(--text-color); transition: 0.3s;
+        }
+        .app-container { width: 100%; max-width: 450px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
+        .semester-selector { display: flex; background: rgba(0, 0, 0, 0.2); border-radius: 15px; padding: 5px; margin-bottom: 20px; }
+        .sem-btn { flex: 1; padding: 10px; border: none; background: none; color: white; font-weight: bold; border-radius: 12px; cursor: pointer; }
+        .sem-btn.active { background: white; color: #000; }
+        .header-score { text-align: center; color: white; padding: 10px 0; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .header-score h1 { font-size: 4.5rem; margin: 0; font-weight: 900; color: var(--sn-yellow); }
+        .mention-text { font-size: 1.2rem; font-weight: bold; margin-top: 5px; min-height: 1.5em; }
+        .matiere-card { background: var(--card-bg); border-radius: 25px; padding: 18px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .matiere-name { border: none; background: none; font-weight: 800; font-size: 1.1rem; width: 45%; color: var(--text-color); }
+        .coef-box { background: #e2e8f0; padding: 5px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; color: #000; }
+        .coef-box input { width: 30px; border: none; background: none; text-align: center; font-weight: 900; }
+        .notes-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .note-field input { width: 100%; padding: 10px; border-radius: 12px; border: 1.5px solid #cbd5e1; text-align: center; font-weight: 800; box-sizing: border-box; }
+        
+        /* Bannière Publicitaire */
+        .ad-banner { text-align: center; margin: 15px 0; min-height: 50px; }
+
+        .iphone-dock {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 95%; max-width: 440px; background: var(--dock-bg); backdrop-filter: blur(25px);
+            border-radius: 40px; padding: 12px; display: flex; justify-content: space-around;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); z-index: 1000; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .dock-app { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; border: none; background: none; text-decoration: none; }
+        .app-icon { width: 50px; height: 50px; border-radius: 12px; background: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .app-label { color: white; font-size: 0.65rem; font-weight: bold; }
+        .ios-popup {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; max-height: 75vh; background: var(--card-bg); border-radius: 30px; padding: 25px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); z-index: 2000; overflow-y: auto; color: var(--text-color);
+        }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="loader" class="card">
-        <p>Vérification de session...</p>
+<div class="app-container">
+    <div class="semester-selector">
+        <button class="sem-btn active" id="btn-s1" onclick="switchSemester(1)">1er Semestre</button>
+        <button class="sem-btn" id="btn-s2" onclick="switchSemester(2)">2ème Semestre</button>
     </div>
 
-    <div id="authView" class="card hidden">
-        <h1>PosterMarket</h1>
-        <p id="subTitle">Rejoignez la communauté</p>
-        
-        <div id="inputs">
-            <input id="email" type="email" placeholder="Email">
-            <input id="password" type="password" placeholder="Mot de passe">
-        </div>
-
-        <button class="primary" id="btnAction">Se connecter</button>
-        <button class="secondary" id="btnToggle">Nouveau ? S'inscrire</button>
-        
-        <p id="statusMsg" class="status"></p>
+    <div class="header-score">
+        <h1 id="score-display">0.00</h1>
+        <div class="mention-text" id="mention-display"></div>
+        <div style="font-size:0.8rem; opacity:0.9; margin-top:5px;">Moyenne Annuelle: <span id="moy-annuelle">--</span></div>
     </div>
 
-    <div id="appView" class="card hidden">
-        <h1>Espace Vendeur</h1>
-        <p>Bienvenue sur votre tableau de bord.</p>
-        <button class="secondary" onclick="logout()">Se déconnecter</button>
+    <div class="ad-banner">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:320px;height:50px"
+             data-ad-client="ca-pub-2847151888169934"
+             data-ad-slot="7751303675"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </div>
+
+    <div id="container-s1"></div>
+    <div id="container-s2" class="hidden"></div>
+
+    <div id="popup-history" class="ios-popup">
+        <h3 style="text-align:center">📜 Historique</h3>
+        <div id="history-list"></div>
+        <button onclick="closePopups()" style="width:100%; padding:15px; margin-top:15px; border-radius:15px; border:none; background:#eee; font-weight:bold;">Fermer</button>
+    </div>
+</div>
+
+<div class="iphone-dock">
+    <button class="dock-app" onclick="ajouterMatiere()">
+        <div class="app-icon">➕</div><span class="app-label">Matière</span>
+    </button>
+    <button class="dock-app" onclick="sauvegarderHist()">
+        <div class="app-icon" style="background: #000; color:white;">💾</div><span class="app-label">Sauver</span>
+    </button>
+    <button class="dock-app" onclick="toggleHistory()">
+        <div class="app-icon" style="background: #007aff; color:white;">📜</div><span class="app-label">Hist.</span>
+    </button>
+    <a href="soutien.html" class="dock-app">
+        <div class="app-icon" style="background: #ffcc00; color:black;">❤️</div><span class="app-label">Soutenir</span>
+    </a>
+    <button class="dock-app" onclick="toggleDarkMode()">
+        <div class="app-icon" style="background: #5856d6; color:white;">🌙</div><span class="app-label">Mode</span>
+    </button>
+</div>
 
 <script>
-    // CONFIGURATION AVEC TES CLÉS RÉCUPÉRÉES
-    const SB_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co"; 
-    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
-    const _sb = supabase.createClient(SB_URL, SB_KEY);
+let currentSem = 1;
 
-    let isSignup = false;
+function switchSemester(sem) {
+    currentSem = sem;
+    document.getElementById('btn-s1').classList.toggle('active', sem === 1);
+    document.getElementById('btn-s2').classList.toggle('active', sem === 2);
+    document.getElementById('container-s1').classList.toggle('hidden', sem === 2);
+    document.getElementById('container-s2').classList.toggle('hidden', sem === 1);
+    calculerSeul();
+}
 
-    // ÉLÉMENTS DU DOM
-    const authView = document.getElementById('authView');
-    const appView = document.getElementById('appView');
-    const loader = document.getElementById('loader');
-    const statusMsg = document.getElementById('statusMsg');
+function ajouterMatiere(nom="", coef=1, d1="", d2="", comp="") {
+    const id = Date.now() + Math.random();
+    const container = document.getElementById(`container-s${currentSem}`);
+    const div = document.createElement('div');
+    div.className = 'matiere-card';
+    div.id = `card-${id}`;
+    div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <input type="text" class="matiere-name" value="${nom}" placeholder="NOM">
+            <div style="display:flex; gap:8px; align-items:center;">
+                <div class="coef-box">COEF: <input type="number" class="val-coef" value="${coef}" min="1" oninput="calculerSeul()"></div>
+                <span style="color:red; cursor:pointer; font-weight:bold; font-size:1.2rem;" onclick="this.closest('.matiere-card').remove(); calculerSeul();">×</span>
+            </div>
+        </div>
+        <div class="notes-grid">
+            <div class="note-field"><input type="number" class="val-d1" value="${d1}" placeholder="D1" oninput="calculerSeul()"></div>
+            <div class="note-field"><input type="number" class="val-d2" value="${d2}" placeholder="D2" oninput="calculerSeul()"></div>
+            <div class="note-field"><input type="number" class="val-comp" value="${comp}" placeholder="Comp" oninput="calculerSeul()"></div>
+        </div>`;
+    container.appendChild(div);
+    calculerSeul();
+}
 
-    // 1. GESTION DE LA SESSION AUTOMATIQUE
-    _sb.auth.onAuthStateChange((event, session) => {
-        loader.classList.add('hidden');
-        if (session) {
-            authView.classList.add('hidden');
-            appView.classList.remove('hidden');
-        } else {
-            authView.classList.remove('hidden');
-            appView.classList.add('hidden');
-        }
+// LOGIQUE SÉNÉGALAISE : ((D1+D2)/2 + COMP) / 2
+function getMoyenneSemestre(sem) {
+    const cards = document.querySelectorAll(`#container-s${sem} .matiere-card`);
+    let cumulPoints = 0;
+    let totalCoefs = 0;
+
+    cards.forEach(card => {
+        const d1 = parseFloat(card.querySelector('.val-d1').value) || 0;
+        const d2 = parseFloat(card.querySelector('.val-d2').value) || 0;
+        const comp = parseFloat(card.querySelector('.val-comp').value) || 0;
+        const coef = parseFloat(card.querySelector('.val-coef').value) || 1;
+
+        const moyDevoirs = (d1 + d2) / 2;
+        const moyMatiere = (moyDevoirs + comp) / 2;
+
+        cumulPoints += (moyMatiere * coef);
+        totalCoefs += coef;
     });
 
-    // 2. BASCULER ENTRE CONNEXION ET INSCRIPTION
-    document.getElementById('btnToggle').onclick = () => {
-        isSignup = !isSignup;
-        document.getElementById('btnAction').innerText = isSignup ? "S'inscrire" : "Se connecter";
-        document.getElementById('btnToggle').innerText = isSignup ? "Déjà membre ? Connexion" : "Nouveau ? S'inscrire";
-        statusMsg.innerText = "";
-    };
+    return totalCoefs > 0 ? (cumulPoints / totalCoefs) : 0;
+}
 
-    // 3. ACTION PRINCIPALE (S'INSCRIRE OU SE CONNECTER)
-    document.getElementById('btnAction').onclick = async () => {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        statusMsg.innerText = "Chargement...";
+function calculerSeul() {
+    const moy = getMoyenneSemestre(currentSem);
+    document.getElementById('score-display').innerText = moy.toFixed(2);
+    
+    const disp = document.getElementById('mention-display');
+    if(moy >= 16) disp.innerText = "🌟 Félicitations !";
+    else if(moy >= 14) disp.innerText = "👏 Très Bien";
+    else if(moy >= 12) disp.innerText = "👍 Assez Bien";
+    else if(moy >= 10) disp.innerText = "🎯 Admis";
+    else if(moy > 0) disp.innerText = "📚 Doit progresser";
+    else disp.innerText = "";
 
-        if (isSignup) {
-            const { error } = await _sb.auth.signUp({ email, password });
-            if (error) statusMsg.innerText = "Erreur : " + error.message;
-            else statusMsg.innerText = "Compte créé ! Vérifiez vos emails ou connectez-vous.";
-        } else {
-            const { error } = await _sb.auth.signInWithPassword({ email, password });
-            if (error) statusMsg.innerText = "Erreur : Clé API ou Identifiants invalides.";
-        }
-    };
-
-    // 4. DÉCONNEXION
-    async function logout() {
-        await _sb.auth.signOut();
+    const s1 = getMoyenneSemestre(1);
+    const s2 = getMoyenneSemestre(2);
+    if(s1 > 0 && s2 > 0) {
+        document.getElementById('moy-annuelle').innerText = ((s1 + s2) / 2).toFixed(2);
+    } else {
+        document.getElementById('moy-annuelle').innerText = "--";
     }
-</script>
+}
 
+function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+function closePopups() { document.querySelectorAll('.ios-popup').forEach(p => p.style.display='none'); }
+
+function sauvegarderHist() {
+    const moy = document.getElementById('score-display').innerText;
+    let h = JSON.parse(localStorage.getItem('sn_moy_hist') || "[]");
+    h.unshift({ date: new Date().toLocaleString('fr-FR'), moy: moy });
+    localStorage.setItem('sn_moy_hist', JSON.stringify(h.slice(0,10)));
+    alert("Sauvegardé !");
+}
+
+function toggleHistory() {
+    const h = JSON.parse(localStorage.getItem('sn_moy_hist') || "[]");
+    document.getElementById('history-list').innerHTML = h.map(i => `<div style="padding:10px; border-bottom:1px solid #eee"><b>${i.moy}</b> <small style="float:right">${i.date}</small></div>`).join('') || "Historique vide.";
+    document.getElementById('popup-history').style.display = 'block';
+}
+
+window.onload = () => { ajouterMatiere("Français", 2); };
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+    });
+}
+</script>
 </body>
 </html>
+
