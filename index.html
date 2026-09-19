@@ -2,220 +2,212 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sénégal Scolaire OS</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Ma Moyenne">
-    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Poème pour mon amour</title>
+
     <style>
-        :root {
-            --sn-green: #00853f; --sn-yellow: #fdef42; --sn-red: #e31b23;
-            --dock-bg: rgba(255, 255, 255, 0.4); --card-bg: rgba(255, 255, 255, 0.95); --text-color: #000;
+        * {
+            box-sizing: border-box;
         }
-        .dark-mode {
-            --sn-green: #004d25; --sn-yellow: #b3a700; --sn-red: #8b1116;
-            --dock-bg: rgba(0, 0, 0, 0.6); --card-bg: rgba(30, 30, 30, 0.95); --text-color: #fff;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0;
-            background: linear-gradient(135deg, var(--sn-green), var(--sn-yellow), var(--sn-red));
-            background-attachment: fixed; min-height: 100vh; padding-bottom: 180px; color: var(--text-color); transition: 0.3s;
-        }
-        .app-container { width: 100%; max-width: 450px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
-        .semester-selector { display: flex; background: rgba(0, 0, 0, 0.2); border-radius: 15px; padding: 5px; margin-bottom: 20px; }
-        .sem-btn { flex: 1; padding: 10px; border: none; background: none; color: white; font-weight: bold; border-radius: 12px; cursor: pointer; }
-        .sem-btn.active { background: white; color: #000; }
-        .header-score { text-align: center; color: white; padding: 10px 0; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .header-score h1 { font-size: 4.5rem; margin: 0; font-weight: 900; color: var(--sn-yellow); }
-        .mention-text { font-size: 1.2rem; font-weight: bold; margin-top: 5px; min-height: 1.5em; }
-        .matiere-card { background: var(--card-bg); border-radius: 25px; padding: 18px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .matiere-name { border: none; background: none; font-weight: 800; font-size: 1.1rem; width: 45%; color: var(--text-color); }
-        .coef-box { background: #e2e8f0; padding: 5px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; color: #000; }
-        .coef-box input { width: 30px; border: none; background: none; text-align: center; font-weight: 900; }
-        .notes-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .note-field input { width: 100%; padding: 10px; border-radius: 12px; border: 1.5px solid #cbd5e1; text-align: center; font-weight: 800; box-sizing: border-box; }
-        
-        /* Bannière Publicitaire */
-        .ad-banner { text-align: center; margin: 15px 0; min-height: 50px; }
 
-        .iphone-dock {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 95%; max-width: 440px; background: var(--dock-bg); backdrop-filter: blur(25px);
-            border-radius: 40px; padding: 12px; display: flex; justify-content: space-around;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3); z-index: 1000; border: 1px solid rgba(255,255,255,0.2);
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background:
+                radial-gradient(circle at top, #5b164d, #160817 60%, #050207);
+            font-family: Georgia, serif;
+            color: white;
+            overflow: hidden;
         }
-        .dock-app { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; border: none; background: none; text-decoration: none; }
-        .app-icon { width: 50px; height: 50px; border-radius: 12px; background: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .app-label { color: white; font-size: 0.65rem; font-weight: bold; }
-        .ios-popup {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; max-height: 75vh; background: var(--card-bg); border-radius: 30px; padding: 25px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5); z-index: 2000; overflow-y: auto; color: var(--text-color);
+
+        /* Petites étoiles */
+        .stars {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
         }
-        .hidden { display: none; }
+
+        .star {
+            position: absolute;
+            color: #ffffff;
+            opacity: 0.7;
+            animation: twinkle 2s infinite alternate;
+        }
+
+        .star:nth-child(1) { left: 10%; top: 15%; }
+        .star:nth-child(2) { left: 80%; top: 20%; animation-delay: .5s; }
+        .star:nth-child(3) { left: 25%; top: 75%; animation-delay: 1s; }
+        .star:nth-child(4) { left: 90%; top: 70%; animation-delay: .3s; }
+        .star:nth-child(5) { left: 50%; top: 10%; animation-delay: .8s; }
+
+        .card {
+            width: 90%;
+            max-width: 500px;
+            padding: 35px 25px;
+            text-align: center;
+
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+
+            backdrop-filter: blur(12px);
+
+            box-shadow:
+                0 0 40px rgba(255, 40, 160, 0.25);
+        }
+
+        .heart {
+            font-size: 55px;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        h1 {
+            margin: 10px 0;
+            font-size: 30px;
+            color: #ff9bd5;
+            text-shadow: 0 0 15px #ff3fa7;
+        }
+
+        .subtitle {
+            color: #ddd;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        #poeme {
+            min-height: 110px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-size: 21px;
+            line-height: 1.6;
+            color: #fff;
+        }
+
+        .phrase {
+            animation: apparition 1.2s ease;
+        }
+
+        .dots {
+            margin-top: 20px;
+            color: #ff82c6;
+            letter-spacing: 5px;
+        }
+
+        @keyframes apparition {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes heartbeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+        }
+
+        @keyframes twinkle {
+            from {
+                opacity: 0.2;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-<div class="app-container">
-    <div class="semester-selector">
-        <button class="sem-btn active" id="btn-s1" onclick="switchSemester(1)">1er Semestre</button>
-        <button class="sem-btn" id="btn-s2" onclick="switchSemester(2)">2ème Semestre</button>
+    <div class="stars">
+        <span class="star">✦</span>
+        <span class="star">✧</span>
+        <span class="star">✦</span>
+        <span class="star">✧</span>
+        <span class="star">✦</span>
     </div>
 
-    <div class="header-score">
-        <h1 id="score-display">0.00</h1>
-        <div class="mention-text" id="mention-display"></div>
-        <div style="font-size:0.8rem; opacity:0.9; margin-top:5px;">Moyenne Annuelle: <span id="moy-annuelle">--</span></div>
-    </div>
+    <div class="card">
 
-    <div class="ad-banner">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-        <ins class="adsbygoogle"
-             style="display:inline-block;width:320px;height:50px"
-             data-ad-client="ca-pub-2847151888169934"
-             data-ad-slot="7751303675"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </div>
+        <div class="heart">❤️</div>
 
-    <div id="container-s1"></div>
-    <div id="container-s2" class="hidden"></div>
+        <h1>Poème pour mon amour</h1>
 
-    <div id="popup-history" class="ios-popup">
-        <h3 style="text-align:center">📜 Historique</h3>
-        <div id="history-list"></div>
-        <button onclick="closePopups()" style="width:100%; padding:15px; margin-top:15px; border-radius:15px; border:none; background:#eee; font-weight:bold;">Fermer</button>
-    </div>
-</div>
+        <div class="subtitle">
+            Quelques mots venant du cœur...
+        </div>
 
-<div class="iphone-dock">
-    <button class="dock-app" onclick="ajouterMatiere()">
-        <div class="app-icon">➕</div><span class="app-label">Matière</span>
-    </button>
-    <button class="dock-app" onclick="sauvegarderHist()">
-        <div class="app-icon" style="background: #000; color:white;">💾</div><span class="app-label">Sauver</span>
-    </button>
-    <button class="dock-app" onclick="toggleHistory()">
-        <div class="app-icon" style="background: #007aff; color:white;">📜</div><span class="app-label">Hist.</span>
-    </button>
-    <a href="soutien.html" class="dock-app">
-        <div class="app-icon" style="background: #ffcc00; color:black;">❤️</div><span class="app-label">Soutenir</span>
-    </a>
-    <button class="dock-app" onclick="toggleDarkMode()">
-        <div class="app-icon" style="background: #5856d6; color:white;">🌙</div><span class="app-label">Mode</span>
-    </button>
-</div>
-
-<script>
-let currentSem = 1;
-
-function switchSemester(sem) {
-    currentSem = sem;
-    document.getElementById('btn-s1').classList.toggle('active', sem === 1);
-    document.getElementById('btn-s2').classList.toggle('active', sem === 2);
-    document.getElementById('container-s1').classList.toggle('hidden', sem === 2);
-    document.getElementById('container-s2').classList.toggle('hidden', sem === 1);
-    calculerSeul();
-}
-
-function ajouterMatiere(nom="", coef=1, d1="", d2="", comp="") {
-    const id = Date.now() + Math.random();
-    const container = document.getElementById(`container-s${currentSem}`);
-    const div = document.createElement('div');
-    div.className = 'matiere-card';
-    div.id = `card-${id}`;
-    div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <input type="text" class="matiere-name" value="${nom}" placeholder="NOM">
-            <div style="display:flex; gap:8px; align-items:center;">
-                <div class="coef-box">COEF: <input type="number" class="val-coef" value="${coef}" min="1" oninput="calculerSeul()"></div>
-                <span style="color:red; cursor:pointer; font-weight:bold; font-size:1.2rem;" onclick="this.closest('.matiere-card').remove(); calculerSeul();">×</span>
+        <div id="poeme">
+            <div class="phrase">
+                Clique et laisse les mots défiler...
             </div>
         </div>
-        <div class="notes-grid">
-            <div class="note-field"><input type="number" class="val-d1" value="${d1}" placeholder="D1" oninput="calculerSeul()"></div>
-            <div class="note-field"><input type="number" class="val-d2" value="${d2}" placeholder="D2" oninput="calculerSeul()"></div>
-            <div class="note-field"><input type="number" class="val-comp" value="${comp}" placeholder="Comp" oninput="calculerSeul()"></div>
-        </div>`;
-    container.appendChild(div);
-    calculerSeul();
-}
 
-// LOGIQUE SÉNÉGALAISE : ((D1+D2)/2 + COMP) / 2
-function getMoyenneSemestre(sem) {
-    const cards = document.querySelectorAll(`#container-s${sem} .matiere-card`);
-    let cumulPoints = 0;
-    let totalCoefs = 0;
+        <div class="dots">• • •</div>
 
-    cards.forEach(card => {
-        const d1 = parseFloat(card.querySelector('.val-d1').value) || 0;
-        const d2 = parseFloat(card.querySelector('.val-d2').value) || 0;
-        const comp = parseFloat(card.querySelector('.val-comp').value) || 0;
-        const coef = parseFloat(card.querySelector('.val-coef').value) || 1;
+    </div>
 
-        const moyDevoirs = (d1 + d2) / 2;
-        const moyMatiere = (moyDevoirs + comp) / 2;
 
-        cumulPoints += (moyMatiere * coef);
-        totalCoefs += coef;
-    });
+    <script>
 
-    return totalCoefs > 0 ? (cumulPoints / totalCoefs) : 0;
-}
+        const phrases = [
+            "Depuis que tu es là, mes journées ont une autre couleur.",
+            "Ton sourire a le pouvoir de rendre mes mauvais jours plus doux.",
+            "Même parmi des milliers de personnes, mes yeux chercheraient les tiens.",
+            "Je ne cherche pas des mots parfaits, seulement des mots sincères.",
+            "Tu occupes une petite place dans mon cœur... qui prend pourtant beaucoup de place.",
+            "Chaque moment passé avec toi devient un souvenir que je veux garder.",
+            "Si le bonheur avait un visage, j'aimerais qu'il ressemble au tien.",
+            "Et si je devais recommencer, je choisirais encore de te connaître.",
+            "Merci simplement d'être toi. ❤️"
+        ];
 
-function calculerSeul() {
-    const moy = getMoyenneSemestre(currentSem);
-    document.getElementById('score-display').innerText = moy.toFixed(2);
-    
-    const disp = document.getElementById('mention-display');
-    if(moy >= 16) disp.innerText = "🌟 Félicitations !";
-    else if(moy >= 14) disp.innerText = "👏 Très Bien";
-    else if(moy >= 12) disp.innerText = "👍 Assez Bien";
-    else if(moy >= 10) disp.innerText = "🎯 Admis";
-    else if(moy > 0) disp.innerText = "📚 Doit progresser";
-    else disp.innerText = "";
+        let index = 0;
 
-    const s1 = getMoyenneSemestre(1);
-    const s2 = getMoyenneSemestre(2);
-    if(s1 > 0 && s2 > 0) {
-        document.getElementById('moy-annuelle').innerText = ((s1 + s2) / 2).toFixed(2);
-    } else {
-        document.getElementById('moy-annuelle').innerText = "--";
-    }
-}
+        const poeme = document.getElementById("poeme");
 
-function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
-function closePopups() { document.querySelectorAll('.ios-popup').forEach(p => p.style.display='none'); }
+        function afficherPhrase() {
 
-function sauvegarderHist() {
-    const moy = document.getElementById('score-display').innerText;
-    let h = JSON.parse(localStorage.getItem('sn_moy_hist') || "[]");
-    h.unshift({ date: new Date().toLocaleString('fr-FR'), moy: moy });
-    localStorage.setItem('sn_moy_hist', JSON.stringify(h.slice(0,10)));
-    alert("Sauvegardé !");
-}
+            poeme.innerHTML = "";
 
-function toggleHistory() {
-    const h = JSON.parse(localStorage.getItem('sn_moy_hist') || "[]");
-    document.getElementById('history-list').innerHTML = h.map(i => `<div style="padding:10px; border-bottom:1px solid #eee"><b>${i.moy}</b> <small style="float:right">${i.date}</small></div>`).join('') || "Historique vide.";
-    document.getElementById('popup-history').style.display = 'block';
-}
+            const phrase = document.createElement("div");
 
-window.onload = () => { ajouterMatiere("Français", 2); };
+            phrase.className = "phrase";
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
-    });
-}
-</script>
+            phrase.textContent = phrases[index];
+
+            poeme.appendChild(phrase);
+
+            index++;
+
+            if (index >= phrases.length) {
+                index = 0;
+            }
+        }
+
+        // Première phrase
+        setTimeout(afficherPhrase, 1500);
+
+        // Une nouvelle phrase toutes les 4 secondes
+        setInterval(afficherPhrase, 4000);
+
+    </script>
+
 </body>
 </html>
-
